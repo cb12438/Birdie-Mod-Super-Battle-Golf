@@ -8,14 +8,6 @@ Press **F6** in-game to open the settings panel and toggle anything on or off.
 
 ---
 
-## Requirements
-
-- Super Battle Golf installed via Steam
-- Windows 10 or later
-- **MelonLoader is bundled — you do not need to install it separately**
-
----
-
 ## Installation
 
 1. Download `BirdieModInstaller.exe` from the [GolfStuff/Release](GolfStuff/Release/) folder
@@ -23,6 +15,9 @@ Press **F6** in-game to open the settings panel and toggle anything on or off.
 3. If the game folder is not found, click **Browse** and select the folder containing `Super Battle Golf.exe`
 4. Click **Install** and wait for it to finish
 5. Launch the game normally through Steam
+
+
+![Installer](https://i.imgur.com/wS2LRIP.png)
 
 **Updating:** Run the new installer and click Install — it detects an existing install and overwrites only what changed.
 
@@ -35,6 +30,8 @@ Press **F6** in-game to open the settings panel and toggle anything on or off.
 ## Features
 
 Open the settings panel with **F6** to toggle everything.
+
+![Features Tab](https://i.imgur.com/aShiXJj.png)
 
 ### Everyone — works for any player regardless of host status
 
@@ -52,6 +49,8 @@ Open the settings panel with **F6** to toggle everything.
 | **Infinite Ammo** | Never run out of item ammo |
 | **HUD** | On-screen display showing which features are currently active |
 
+![Hole in One](https://i.imgur.com/HTwXSz2.png)
+
 ### Host Recommended — full effect as host; may be partial as client
 
 | Feature | Description |
@@ -67,20 +66,15 @@ Open the settings panel with **F6** to toggle everything.
 |---|---|
 | **Expanded Slots** | Expands the hotbar to 8 total slots (keys 1–8). As host: all players in the lobby get real server-side slots. As client: visual UI only. |
 
----
-
-## Multiplayer & Host Compatibility
-
-Birdie Mod only affects the player who has it installed. Other players in your lobby are **never affected** unless noted above.
-
-- **As Host:** All features work at full strength. Expanded Slots adds real server-side inventory slots — every player in the lobby benefits, even those without the mod.
-- **As Client:** All personal features still work. Expanded Slots gives you the visual UI expansion, but extra slots have no server backing unless the host also runs the mod.
+![Expanded Slots](https://i.imgur.com/h7Qx5bH.png)
 
 ---
 
 ## Default Keybinds
 
 All keybinds can be rebound in the **Keys** tab of the F6 settings menu.
+
+![Keybinds Tab](https://i.imgur.com/vtidAqW.png)
 
 | Key | Action |
 |---|---|
@@ -102,6 +96,15 @@ All keybinds can be rebound in the **Keys** tab of the F6 settings menu.
 | `M` | Toggle landmine immunity |
 | `L` | Toggle lock-on any distance |
 | `U` | Toggle expanded item slots |
+
+---
+
+## Multiplayer & Host Compatibility
+
+Birdie Mod only affects the player who has it installed. Other players in your lobby are **never affected** unless noted above.
+
+- **As Host:** All features work at full strength. Expanded Slots adds real server-side inventory slots — every player in the lobby benefits, even those without the mod.
+- **As Client:** All personal features still work. Expanded Slots gives you the visual UI expansion, but extra slots have no server backing unless the host also runs the mod.
 
 ---
 
