@@ -1,5 +1,4 @@
-using MelonLoader;
-using System;
+﻿using System;
 using System.Reflection;
 using System.Text;
 using TMPro;
@@ -184,7 +183,7 @@ public partial class BirdieMod
                 cg.alpha = 0f;
                 settingsPanelObject.transform.localScale = new Vector3(0.92f, 0.92f, 1f);
             }
-            MelonCoroutines.Start(AnimatePanelOpen());
+            BirdieCoroutine.Start(AnimatePanelOpen());
         }
         MarkHudDirty();
     }
@@ -197,7 +196,7 @@ public partial class BirdieMod
         ApplyCursorUnlockForSettings(false);
         ApplyGameInputSuppressionForSettings(false);
         // Coroutine deactivates panel after animation; do not call UpdateSettingsPanelVisibility() here
-        MelonCoroutines.Start(AnimatePanelClose());
+        BirdieCoroutine.Start(AnimatePanelClose());
         MarkHudDirty();
     }
 
@@ -911,7 +910,7 @@ public partial class BirdieMod
             Color targetColor = newVal
                 ? new Color(0.22f, 0.50f, 0.90f, 1f)
                 : new Color(0.28f, 0.28f, 0.33f, 1f);
-            MelonCoroutines.Start(AnimatePillSlide(capturedKnobRect, capturedPillBg, targetX, targetColor));
+            BirdieCoroutine.Start(AnimatePillSlide(capturedKnobRect, capturedPillBg, targetX, targetColor));
         }));
     }
 
@@ -1715,12 +1714,12 @@ public partial class BirdieMod
             BirdieIcePatchBridge.EnsurePatchApplied();
             BirdieIcePatchBridge.IsActive = true;
 
-            MelonLogger.Msg(string.Format("[Birdie] Ice immunity ON  (normal drag = {0:F3})", normalHorizontalDragValue));
+            BirdieLog.Msg(string.Format("[Birdie] Ice immunity ON  (normal drag = {0:F3})", normalHorizontalDragValue));
         }
         else
         {
             BirdieIcePatchBridge.IsActive = false;
-            MelonLogger.Msg("[Birdie] Ice immunity OFF");
+            BirdieLog.Msg("[Birdie] Ice immunity OFF");
         }
 
         MarkHudDirty();
@@ -1803,13 +1802,13 @@ public partial class BirdieMod
 
         if (cachedRewardCreditsMethod == null)
         {
-            MelonLogger.Warning("[Birdie] Credits: RewardCredits not found — game version may differ.");
+            BirdieLog.Warning("[Birdie] Credits: RewardCredits not found — game version may differ.");
             return;
         }
 
         if (amount <= 0)
         {
-            MelonLogger.Warning("[Birdie] Credits: amount must be greater than zero.");
+            BirdieLog.Warning("[Birdie] Credits: amount must be greater than zero.");
             return;
         }
 
@@ -1817,11 +1816,11 @@ public partial class BirdieMod
         {
             // checkCheats=false bypasses MatchSetupRules.IsCheatsEnabled() check.
             cachedRewardCreditsMethod.Invoke(null, new object[] { amount, false });
-            MelonLogger.Msg("[Birdie] Credits: granted " + amount + " credits.");
+            BirdieLog.Msg("[Birdie] Credits: granted " + amount + " credits.");
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Credits grant: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Credits grant: " + ex.Message);
         }
     }
 }
@@ -1871,7 +1870,7 @@ internal static class BirdieIcePatchBridge
 
             if (playerMovementType == null)
             {
-                MelonLogger.Warning("[Birdie] Ice patch: PlayerMovement type not found");
+                BirdieLog.Warning("[Birdie] Ice patch: PlayerMovement type not found");
                 patchApplied = false;
                 return;
             }
@@ -1882,7 +1881,7 @@ internal static class BirdieIcePatchBridge
 
             if (original == null)
             {
-                MelonLogger.Warning("[Birdie] Ice patch: PlayerMovement.UpdatePhysicsParameters not found");
+                BirdieLog.Warning("[Birdie] Ice patch: PlayerMovement.UpdatePhysicsParameters not found");
                 patchApplied = false;
                 return;
             }
@@ -1913,14 +1912,14 @@ internal static class BirdieIcePatchBridge
 
             if (harmonyType == null)
             {
-                MelonLogger.Warning("[Birdie] Ice patch: HarmonyLib.Harmony not found at runtime");
+                BirdieLog.Warning("[Birdie] Ice patch: HarmonyLib.Harmony not found at runtime");
                 patchApplied = false;
                 return;
             }
 
             if (harmonyMethodType == null)
             {
-                MelonLogger.Warning("[Birdie] Ice patch: HarmonyLib.HarmonyMethod not found at runtime");
+                BirdieLog.Warning("[Birdie] Ice patch: HarmonyLib.HarmonyMethod not found at runtime");
                 patchApplied = false;
                 return;
             }
@@ -1935,7 +1934,7 @@ internal static class BirdieIcePatchBridge
 
             if (postfixMethod == null)
             {
-                MelonLogger.Warning("[Birdie] Ice patch: Postfix method not found on BirdieIcePatchBridge");
+                BirdieLog.Warning("[Birdie] Ice patch: Postfix method not found on BirdieIcePatchBridge");
                 patchApplied = false;
                 return;
             }
@@ -1965,7 +1964,7 @@ internal static class BirdieIcePatchBridge
 
             if (patchMethod == null)
             {
-                MelonLogger.Warning("[Birdie] Ice patch: Harmony.Patch(MethodBase,...) overload not found");
+                BirdieLog.Warning("[Birdie] Ice patch: Harmony.Patch(MethodBase,...) overload not found");
                 patchApplied = false;
                 return;
             }
@@ -1988,11 +1987,11 @@ internal static class BirdieIcePatchBridge
             }
 
             patchMethod.Invoke(harmony, patchArgs);
-            MelonLogger.Msg("[Birdie] Ice patch: Harmony postfix registered on PlayerMovement.UpdatePhysicsParameters");
+            BirdieLog.Msg("[Birdie] Ice patch: Harmony postfix registered on PlayerMovement.UpdatePhysicsParameters");
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Ice patch error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Ice patch error: " + ex.Message);
             patchApplied = false; // allow retry on next toggle
         }
     }
@@ -2021,7 +2020,7 @@ internal static class BirdieIcePatchBridge
                 if (now - lastLogTime >= 1f)
                 {
                     lastLogTime = now;
-                    MelonLogger.Msg(string.Format(
+                    BirdieLog.Msg(string.Format(
                         "[Birdie] Ice immunity: horizontalDrag {0:F3} -> {1:F3}",
                         current,
                         NormalDragValue));

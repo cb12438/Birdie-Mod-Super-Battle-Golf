@@ -1,5 +1,4 @@
-using MelonLoader;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
@@ -80,20 +79,20 @@ public partial class BirdieMod
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Cosmetic unlock failed: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Cosmetic unlock failed: " + ex.Message);
         }
 
         if (anyFlagApplied)
         {
-            MelonLogger.Msg("[Birdie] Cosmetics unlock applied.");
+            BirdieLog.Msg("[Birdie] Cosmetics unlock applied.");
         }
         else if (anyRefreshInvoked)
         {
-            MelonLogger.Msg("[Birdie] Cosmetics UI refresh triggered.");
+            BirdieLog.Msg("[Birdie] Cosmetics UI refresh triggered.");
         }
         else
         {
-            MelonLogger.Warning("[Birdie] Cosmetics manager not found.");
+            BirdieLog.Warning("[Birdie] Cosmetics manager not found.");
         }
     }
 

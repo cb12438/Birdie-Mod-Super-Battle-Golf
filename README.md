@@ -1,146 +1,143 @@
 # Birdie Mod
 
-> Trainer mod for **Super Battle Golf**
+> A feature-rich host & client mod for **Super Battle Golf**
 
-A [MelonLoader](https://github.com/LavaGang/MelonLoader) mod that adds swing assist with wind compensation, a full in-game settings UI, landmine/ice/knockback immunity, expanded item slots, lock-on range extension, cosmetic unlocks, and more.
+Birdie Mod gives you a full in-game settings panel to toggle gameplay features on and off at any time. Works solo or with friends in private lobbies. The **Host Controls** system lets the lobby host decide which features modded players are allowed to use — so you can share the experience in a controlled, agreed-upon way.
 
-Press **F6** in-game to open the settings panel and toggle anything on or off.
+Press **F6** in-game to open the settings panel.
+
+---
+
+## Downloads
+
+| Version | Download |
+|---------|----------|
+| **BepInEx** (Thunderstore) | [Latest Release](https://github.com/cb12438/Birdie-Mod-Super-Battle-Golf/releases) → `BirdieMod-BepInEx-vX.X.X.zip` |
+| **MelonLoader** | [Latest Release](https://github.com/cb12438/Birdie-Mod-Super-Battle-Golf/releases) → `BirdieMod-MelonLoader-vX.X.X.zip` |
 
 ---
 
 ## Installation
 
-1. Download `BirdieModInstaller.exe` from the [GolfStuff/Release](GolfStuff/Release/) folder
-2. Run the installer — it will automatically detect your game folder
-3. If the game folder is not found, click **Browse** and select the folder containing `Super Battle Golf.exe`
-4. Click **Install** and wait for it to finish
-5. Launch the game normally through Steam
+### BepInEx (Thunderstore)
+1. Install [BepInEx 5 Unity Mono x64](https://github.com/BepInEx/BepInEx/releases) into your `Super Battle Golf` game folder.
+2. Run the game once and close it — BepInEx will create its folder structure.
+3. Drop `BirdieMod.dll` into `Super Battle Golf/BepInEx/plugins/`.
+4. Launch the game. Press **F6** to open settings.
 
-
-![Installer](https://i.imgur.com/wS2LRIP.png)
-
-**Updating:** Run the new installer and click Install — it detects an existing install and overwrites only what changed.
-
-**Uninstalling:** Run `BirdieModUninstaller.exe` and click Uninstall. Original game files are restored from backup.
-
-> **Antivirus warning?** Windows Defender may flag the installer. This is a false positive caused by MelonLoader's DLL injection, the same technique used by all game mods. The mod is safe.
+### MelonLoader
+1. Install [MelonLoader](https://github.com/LavaGang/MelonLoader) into your `Super Battle Golf` game folder.
+2. Run the game once and close it — MelonLoader will create its folder structure.
+3. Drop `BirdieMod.dll` into `Super Battle Golf/Mods/`.
+4. Launch the game. Press **F6** to open settings.
 
 ---
 
 ## Features
 
-Open the settings panel with **F6** to toggle everything.
+Open the settings panel with **F6** to toggle everything on or off individually.
 
 ![Features Tab](https://i.imgur.com/aShiXJj.png)
 
-### Everyone — works for any player regardless of host status
-
 | Feature | Description |
-|---|---|
-| **Swing Assist** | Auto-aims and releases your swing perfectly, accounting for wind and distance to the hole |
-| **Nearest Ball Mode** | Target the closest ball on the course |
-| **Perfect Shot** | Forces every shot to register as perfect |
-| **No Knockback** | Ignore knockback from hits |
+|---------|-------------|
+| **Assist** | Auto-aims and releases your swing at the optimal moment, accounting for wind and distance |
 | **Ice Immunity** | Walk on ice without slipping |
-| **Landmine Immunity** | Walk over landmines without being hit |
-| **Lock-On Any Distance** | Lock-on targets golf balls at any range |
-| **Unlock Cosmetics** | Unlock all cosmetic items |
-| **Coffee Boost** | Instant speed burst |
-| **Infinite Ammo** | Never run out of item ammo |
-| **HUD** | On-screen display showing which features are currently active |
-
-![Hole in One](https://i.imgur.com/HTwXSz2.png)
-
-### Host Recommended — full effect as host; may be partial as client
-
-| Feature | Description |
-|---|---|
+| **Shot Tracer** | Shows your ball's actual flight path |
+| **Impact Preview** | Shows exactly where your ball will land in real time |
 | **No Wind** | Wind does not affect your ball trajectory |
+| **Perfect Shot** | Forces every shot to register as perfect power |
 | **No Air Drag** | Ball travels further through the air |
-| **Speed Multiplier** | Move faster around the course |
-| **No Recoil** | Eliminates weapon recoil |
-
-### Host Provides For All — host must have mod for full benefit
-
-| Feature | Description |
-|---|---|
-| **Expanded Slots** | Expands the hotbar to 8 total slots (keys 1–8). As host: all players in the lobby get real server-side slots. As client: visual UI only. |
+| **Speed Multiplier** | Move faster around the course (adjustable 0.5× to 10×) |
+| **Infinite Item Usage** | Weapons and consumables never run out |
+| **No Recoil** | Removes screen shake when firing weapons |
+| **No Knockback** | Prevents being flung by explosions and hits |
+| **Landmine Immunity** | Walk over landmines without triggering them |
+| **Lock-On Any Distance** | Lock-on targets golf balls at any range |
+| **Coffee Boost** | Instant speed burst on demand |
+| **Expanded Slots** | Expands the hotbar to 7 item slots + golf club slot |
 
 ![Expanded Slots](https://i.imgur.com/h7Qx5bH.png)
 
 ---
 
+## Host Controls
+
+When you are the lobby host, the **Net** tab lets you enable **Host Controls** — a permission system that lets you decide which features other modded players in your lobby can use.
+
+- Turn Host Controls **ON** to send a permissions list to all connected modded clients.
+- Toggle each feature individually to allow or block it.
+- Clients see a **"Host Controls Active"** banner and are restricted accordingly.
+- Turn it **OFF** at any time to restore full access for everyone.
+
+This makes it easy to play with friends with agreed-upon rules — everyone knows what's enabled.
+
+---
+
+## Expanded Slots — How It Works
+
+By default Super Battle Golf gives every player 3 item slots. When **Expanded Slots** is enabled:
+
+- Your hotbar UI expands to show 7 item slots (keys 1–7) plus the golf club slot (key 8).
+- As **host**, an **"Apply to all players"** sub-toggle appears. When ON, the server expands every connected player's inventory — even players without the mod can carry more items. When OFF, only your own inventory is expanded.
+- As **client** without a modded host, the extra UI slots show but the server won't allow items past slot 3.
+
+---
+
 ## Default Keybinds
 
-All keybinds can be rebound in the **Keys** tab of the F6 settings menu.
+All keybinds can be rebound in the **Keys** tab.
 
 ![Keybinds Tab](https://i.imgur.com/vtidAqW.png)
 
 | Key | Action |
-|---|---|
-| `F6` | Open / close settings menu |
-| `F1` | Toggle swing assist |
-| `F2` | Coffee boost |
-| `F3` | Nearest ball mode |
-| `F4` | Unlock cosmetics |
-| `H` | Toggle HUD |
-| `G` | Collect random item |
-| `I` | Toggle ice immunity |
-| `W` | Toggle no wind |
-| `P` | Toggle perfect shot |
-| `D` | Toggle no air drag |
-| `S` | Toggle speed multiplier |
-| `A` | Toggle infinite ammo |
-| `R` | Toggle no recoil |
-| `K` | Toggle no knockback |
-| `M` | Toggle landmine immunity |
-| `L` | Toggle lock-on any distance |
-| `U` | Toggle expanded item slots |
-
----
-
-## Multiplayer & Host Compatibility
-
-Birdie Mod only affects the player who has it installed. Other players in your lobby are **never affected** unless noted above.
-
-- **As Host:** All features work at full strength. Expanded Slots adds real server-side inventory slots — every player in the lobby benefits, even those without the mod.
-- **As Client:** All personal features still work. Expanded Slots gives you the visual UI expansion, but extra slots have no server backing unless the host also runs the mod.
+|-----|--------|
+| **F6** | Open / close settings panel |
+| **F1** | Toggle Assist |
+| **F2** | Coffee Boost |
+| **F3** | Nearest ball mode |
+| **F4** | Unlock cosmetics |
+| **H** | Toggle HUD |
+| **G** | Collect random item |
+| **I** | Ice Immunity |
+| **W** | No Wind |
+| **P** | Perfect Shot |
+| **D** | No Air Drag |
+| **S** | Speed Multiplier |
+| **A** | Infinite Item Usage |
+| **R** | No Recoil |
+| **K** | No Knockback |
+| **M** | Landmine Immunity |
+| **L** | Lock-On Any Distance |
+| **U** | Expanded Slots |
 
 ---
 
 ## Building from Source
 
-**Requirements:**
-- Visual Studio 2019 or 2022 Build Tools (C# compiler)
-- Super Battle Golf installed via Steam
-
-**Steps:**
+**Requirements:** Visual Studio 2019 or 2022 Build Tools (C# compiler), Super Battle Golf installed via Steam.
 
 ```bat
-# 1. Create game_root.txt with the path to your game folder
+# 1. Set your game path
 echo D:\SteamLibrary\steamapps\common\Super Battle Golf > GolfStuff\game_root.txt
 
-# 2. Build BirdieMod.dll (also deploys to your game's Mods folder)
+# 2. Build both DLLs (MelonLoader + BepInEx)
 cd GolfStuff
 compile_mod.bat
-
-# 3. Build BirdieModInstaller.exe + BirdieModUninstaller.exe
-build_gui_installer.bat
 ```
 
-Source files are in [`GolfStuff/Source/BirdieMod/`](GolfStuff/Source/BirdieMod/) (plain `.cs` files, no preprocessor tricks).
-
-All binaries compiled with `/optimize+ /debug:portable` (release builds). No string encryption, no import obfuscation, no packing.
+Source files are in [`GolfStuff/Source/BirdieMod/`](GolfStuff/Source/BirdieMod/). The same source compiles to both mod loaders — `compile_mod.bat` produces both DLLs in one run.
 
 ---
 
 ## Credits
 
-**Birdie Mod — Cb12438**
-Forked and greatly expanded from MidTano's original swing-assist mod. Added wind compensation, full settings UI, landmine/ice/knockback immunity, expanded item slots, lock-on range, and more.
+**Birdie Mod** — cb12438
+Forked and greatly expanded from MidTano's original swing-assist foundation. Added Host Controls networking, wind compensation, full IMGUI settings panel, immunity features, expanded item slots, lock-on range extension, BepInEx dual-build support, and more.
 
-**MidTano — Original Mod**
-Created the bare-bones swing-assist foundation that Birdie Mod is based on. Thanks for laying the groundwork.
+**MidTano** — Original Mod
+The bare-bones swing-assist foundation that Birdie Mod is built upon.
 
-**MelonLoader — https://github.com/LavaGang/MelonLoader**
-The mod loader that makes this all possible.
+**BepInEx** — https://github.com/BepInEx/BepInEx
+
+**MelonLoader** — https://github.com/LavaGang/MelonLoader

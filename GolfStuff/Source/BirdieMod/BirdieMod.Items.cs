@@ -1,5 +1,4 @@
-using MelonLoader;
-using System;
+﻿using System;
 using System.Reflection;
 using UnityEngine;
 
@@ -388,7 +387,7 @@ public partial class BirdieMod
 
         if (Time.time > dispenserPickupDeadline)
         {
-            MelonLogger.Warning("[Birdie] Item spawner (dispenser): timed out waiting for spawned item.");
+            BirdieLog.Warning("[Birdie] Item spawner (dispenser): timed out waiting for spawned item.");
             dispenserPickupPending = false;
             dispenserPickupLocalInventory = null;
             return;
@@ -404,7 +403,7 @@ public partial class BirdieMod
 
         if (cachedCmdGiveToPlayerMethod == null || dispenserPickupLocalInventory == null)
         {
-            MelonLogger.Warning("[Birdie] Item spawner (dispenser): CmdGiveToPlayer reflection not ready.");
+            BirdieLog.Warning("[Birdie] Item spawner (dispenser): CmdGiveToPlayer reflection not ready.");
             dispenserPickupLocalInventory = null;
             return;
         }
@@ -415,7 +414,7 @@ public partial class BirdieMod
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Item spawner (dispenser pickup): " + ex.Message);
+            BirdieLog.Warning("[Birdie] Item spawner (dispenser pickup): " + ex.Message);
         }
 
         dispenserPickupLocalInventory = null;
@@ -514,7 +513,7 @@ public partial class BirdieMod
         Component localInventory = cachedLocalPlayerInventoryProperty.GetValue(null, null) as Component;
         if (localInventory == null)
         {
-            MelonLogger.Warning("[Birdie] Crate: local player inventory not found.");
+            BirdieLog.Warning("[Birdie] Crate: local player inventory not found.");
             return;
         }
 
@@ -535,7 +534,7 @@ public partial class BirdieMod
     {
         if (cachedItemSpawnerType == null)
         {
-            MelonLogger.Warning("[Birdie] Crate: ItemSpawner type not found.");
+            BirdieLog.Warning("[Birdie] Crate: ItemSpawner type not found.");
             return;
         }
 
@@ -575,7 +574,7 @@ public partial class BirdieMod
 
         if (nearestSpawner == null)
         {
-            MelonLogger.Warning("[Birdie] Crate: no item crate with an available box found.");
+            BirdieLog.Warning("[Birdie] Crate: no item crate with an available box found.");
             return;
         }
 
@@ -589,7 +588,7 @@ public partial class BirdieMod
 
         if (cachedServerTryAddItemMethod == null || cachedItemTypeEnumType == null)
         {
-            MelonLogger.Warning("[Birdie] Crate: ServerTryAddItem reflection not ready.");
+            BirdieLog.Warning("[Birdie] Crate: ServerTryAddItem reflection not ready.");
             return;
         }
 
@@ -608,13 +607,13 @@ public partial class BirdieMod
 
             if (!added)
             {
-                MelonLogger.Warning("[Birdie] Crate: inventory full.");
+                BirdieLog.Warning("[Birdie] Crate: inventory full.");
                 return;
             }
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Crate (host grant): " + ex.Message);
+            BirdieLog.Warning("[Birdie] Crate (host grant): " + ex.Message);
             return;
         }
 
@@ -708,13 +707,13 @@ public partial class BirdieMod
 
         if (cachedItemSpawnerType == null || cachedItemSpawnerNetHasItemBoxProp == null)
         {
-            MelonLogger.Warning("[Birdie] Crate teleport: ItemSpawner reflection not ready.");
+            BirdieLog.Warning("[Birdie] Crate teleport: ItemSpawner reflection not ready.");
             return;
         }
 
         if (playerMovement == null)
         {
-            MelonLogger.Warning("[Birdie] Crate teleport: player not found.");
+            BirdieLog.Warning("[Birdie] Crate teleport: player not found.");
             return;
         }
 
@@ -748,7 +747,7 @@ public partial class BirdieMod
 
         if (nearestSpawner == null)
         {
-            MelonLogger.Warning("[Birdie] Crate teleport: no active crates in scene.");
+            BirdieLog.Warning("[Birdie] Crate teleport: no active crates in scene.");
             return;
         }
 
@@ -815,14 +814,14 @@ public partial class BirdieMod
                 cachedServerTryAddItemMethod == null ||
                 cachedItemTypeEnumType == null)
             {
-                MelonLogger.Warning("[Birdie] Item spawner: host reflection cache incomplete.");
+                BirdieLog.Warning("[Birdie] Item spawner: host reflection cache incomplete.");
                 return;
             }
 
             Component inventory = cachedLocalPlayerInventoryProperty.GetValue(null, null) as Component;
             if (inventory == null)
             {
-                MelonLogger.Warning("[Birdie] Item spawner: local player inventory not found.");
+                BirdieLog.Warning("[Birdie] Item spawner: local player inventory not found.");
                 return;
             }
 
@@ -841,12 +840,12 @@ public partial class BirdieMod
 
             if (!added)
             {
-                MelonLogger.Warning("[Birdie] Item spawner: inventory full or item invalid.");
+                BirdieLog.Warning("[Birdie] Item spawner: inventory full or item invalid.");
             }
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Item spawner (host): " + ex.Message);
+            BirdieLog.Warning("[Birdie] Item spawner (host): " + ex.Message);
         }
     }
 
@@ -858,14 +857,14 @@ public partial class BirdieMod
         {
             if (cachedLocalPlayerInventoryProperty == null)
             {
-                MelonLogger.Warning("[Birdie] Item spawner: LocalPlayerInventory reflection not ready.");
+                BirdieLog.Warning("[Birdie] Item spawner: LocalPlayerInventory reflection not ready.");
                 return;
             }
 
             Component localInventory = cachedLocalPlayerInventoryProperty.GetValue(null, null) as Component;
             if (localInventory == null)
             {
-                MelonLogger.Warning("[Birdie] Item spawner: local player inventory not found.");
+                BirdieLog.Warning("[Birdie] Item spawner: local player inventory not found.");
                 return;
             }
 
@@ -894,7 +893,7 @@ public partial class BirdieMod
                         }
                         catch (Exception ex)
                         {
-                            MelonLogger.Warning("[Birdie] Item spawner (dispenser): " + ex.Message);
+                            BirdieLog.Warning("[Birdie] Item spawner (dispenser): " + ex.Message);
                             // Fall through to bridge.
                         }
                     }
@@ -909,11 +908,11 @@ public partial class BirdieMod
             }
 
             // No client path available.
-            MelonLogger.Warning("[Birdie] Item spawner: no client grant path available — host only.");
+            BirdieLog.Warning("[Birdie] Item spawner: no client grant path available — host only.");
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Item spawner (client): " + ex.Message);
+            BirdieLog.Warning("[Birdie] Item spawner (client): " + ex.Message);
         }
     }
 

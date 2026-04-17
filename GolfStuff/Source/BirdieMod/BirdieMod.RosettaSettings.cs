@@ -1,5 +1,4 @@
-using MelonLoader;
-using UnityEngine;
+﻿using UnityEngine;
 
 // IMGUI-based settings panel for BirdieMod.
 //
@@ -153,9 +152,9 @@ public partial class BirdieMod
         _imDescLabel.normal.textColor = new Color(0.50f, 0.50f, 0.58f);
     }
 
-    // ── MelonMod OnGUI ───────────────────────────────────────────────────────
+    // ── OnGUI (called from entry shim) ───────────────────────────────────────
 
-    public override void OnGUI()
+    internal void BirdieOnGUI()
     {
         if (!settingsPanelOpen) return;
 
@@ -237,7 +236,7 @@ public partial class BirdieMod
             ImToggleRowWithDesc("Ice Immunity [" + iceToggleKeyLabel + "]",  iceImmunityEnabled,  "Slide on ice without slipping",                    () => ToggleIceImmunity());
         if (IsFeatureAllowed(1))
             ImToggleRowWithDesc("Shot Tracer",                                  tracersEnabled,       "Shows the ball's actual flight path",              () => { tracersEnabled = !tracersEnabled; SaveCurrentConfig(); MarkTrailVisualSettingsDirty(); MarkHudDirty(); });
-        if (IsFeatureAllowed(-1))
+        if (IsFeatureAllowed(14))
             ImToggleRowWithDesc("Assist [" + assistToggleKeyLabel + "]",        assistEnabled,        "Auto-aims and releases at the perfect moment",     () => ToggleAssist());
         if (IsFeatureAllowed(2))
             ImToggleRowWithDesc("Impact Preview",                               impactPreviewEnabled, "Preview exactly where your shot will land",        () => { impactPreviewEnabled = !impactPreviewEnabled; SaveCurrentConfig(); });
@@ -360,6 +359,13 @@ public partial class BirdieMod
         if (GUILayout.Button("Grant " + creditsGrantAmount + " Credits", _imButton, GUILayout.Height(34f)))
             GrantCredits(creditsGrantAmount);
 
+#if BEPINEX
+        GUILayout.Space(12f);
+        GUIStyle discordStyle = new GUIStyle(_imButton);
+        discordStyle.normal.textColor = new Color(0.56f, 0.62f, 0.90f, 1f);
+        if (GUILayout.Button("Join Discord", discordStyle, GUILayout.Height(30f)))
+            UnityEngine.Application.OpenURL("https://discord.gg/wbhNEHFGMq");
+#endif
     }
 
     // ── Items tab ─────────────────────────────────────────────────────────────
@@ -431,6 +437,7 @@ public partial class BirdieMod
                 ImHostFeatureToggle("Lock-On Any Dist.",   11);
                 ImHostFeatureToggle("Expanded Slots",      12);
                 ImHostFeatureToggle("Coffee Boost",        13);
+                ImHostFeatureToggle("Assist",              14);
             }
         }
         else

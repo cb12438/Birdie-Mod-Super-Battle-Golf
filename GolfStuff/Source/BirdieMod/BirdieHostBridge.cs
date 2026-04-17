@@ -1,5 +1,4 @@
-using MelonLoader;
-using System;
+﻿using System;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
@@ -92,7 +91,7 @@ internal static class BirdieHostBridge
         {
             if (!CollectReflectionCaches())
             {
-                MelonLogger.Warning("[Birdie] Host bridge: Mirror reflection incomplete — host config broadcast unavailable.");
+                BirdieLog.Warning("[Birdie] Host bridge: Mirror reflection incomplete — host config broadcast unavailable.");
                 return;
             }
 
@@ -100,7 +99,7 @@ internal static class BirdieHostBridge
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Host bridge init: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Host bridge init: " + ex.Message);
         }
     }
 
@@ -123,14 +122,14 @@ internal static class BirdieHostBridge
                     BindingFlags.Public | BindingFlags.Static);
                 if (activeProp != null && !(bool)activeProp.GetValue(null, null))
                 {
-                    MelonLogger.Warning("[Birdie] Host bridge: NetworkServer is not active — cannot broadcast.");
+                    BirdieLog.Warning("[Birdie] Host bridge: NetworkServer is not active — cannot broadcast.");
                     return;
                 }
             }
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Host bridge (server check): " + ex.Message);
+            BirdieLog.Warning("[Birdie] Host bridge (server check): " + ex.Message);
             return;
         }
 
@@ -146,7 +145,7 @@ internal static class BirdieHostBridge
             mirrorWriterToArraySegment == null ||
             cachedLocalPlayerInventoryProperty == null)
         {
-            MelonLogger.Warning("[Birdie] Host bridge: broadcast not ready (reflection incomplete).");
+            BirdieLog.Warning("[Birdie] Host bridge: broadcast not ready (reflection incomplete).");
             return;
         }
 
@@ -155,7 +154,7 @@ internal static class BirdieHostBridge
             Component inventory = cachedLocalPlayerInventoryProperty.GetValue(null, null) as Component;
             if (inventory == null)
             {
-                MelonLogger.Warning("[Birdie] Host bridge: LocalPlayerInventory is null.");
+                BirdieLog.Warning("[Birdie] Host bridge: LocalPlayerInventory is null.");
                 return;
             }
 
@@ -186,7 +185,7 @@ internal static class BirdieHostBridge
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Host bridge (broadcast): " + ex.Message);
+            BirdieLog.Warning("[Birdie] Host bridge (broadcast): " + ex.Message);
         }
     }
 
@@ -206,7 +205,7 @@ internal static class BirdieHostBridge
 
             if (mirrorReaderExtReadBool == null || mirrorReaderExtReadULong == null)
             {
-                MelonLogger.Warning("[Birdie] Host bridge client handler: reflection incomplete.");
+                BirdieLog.Warning("[Birdie] Host bridge client handler: reflection incomplete.");
                 return;
             }
 
@@ -217,18 +216,18 @@ internal static class BirdieHostBridge
             {
                 IsUnderHostControl = true;
                 ReceivedFeatureMask = mask;
-                MelonLogger.Msg("[Birdie] Host bridge: host control active, featureMask=0x" + mask.ToString("X16"));
+                BirdieLog.Msg("[Birdie] Host bridge: host control active, featureMask=0x" + mask.ToString("X16"));
             }
             else
             {
                 IsUnderHostControl = false;
                 ReceivedFeatureMask = ulong.MaxValue;
-                MelonLogger.Msg("[Birdie] Host bridge: host control deactivated (all features unlocked).");
+                BirdieLog.Msg("[Birdie] Host bridge: host control deactivated (all features unlocked).");
             }
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Host bridge client handler: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Host bridge client handler: " + ex.Message);
         }
     }
 
@@ -398,7 +397,7 @@ internal static class BirdieHostBridge
 
         if (playerInventoryType == null)
         {
-            MelonLogger.Warning("[Birdie] Host bridge: PlayerInventory type not found.");
+            BirdieLog.Warning("[Birdie] Host bridge: PlayerInventory type not found.");
             return;
         }
 
@@ -418,7 +417,7 @@ internal static class BirdieHostBridge
 
         if (handlerMethod == null)
         {
-            MelonLogger.Warning("[Birdie] Host bridge: ClientHandleSyncHostConfig not found via reflection.");
+            BirdieLog.Warning("[Birdie] Host bridge: ClientHandleSyncHostConfig not found via reflection.");
             return;
         }
 
@@ -444,7 +443,7 @@ internal static class BirdieHostBridge
 
         if (registeredRpcHash == 0)
         {
-            MelonLogger.Warning("[Birdie] Host bridge: RegisterDelegate returned hash 0 — may indicate a collision.");
+            BirdieLog.Warning("[Birdie] Host bridge: RegisterDelegate returned hash 0 — may indicate a collision.");
         }
     }
 }

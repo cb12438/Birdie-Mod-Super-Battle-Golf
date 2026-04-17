@@ -1,5 +1,4 @@
-using MelonLoader;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -7,10 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(BirdieMod), "Birdie Mod", "1.0.0", "Cb12438")]
-[assembly: MelonGame]
-
-public partial class BirdieMod : MelonMod
+public partial class BirdieMod
 {
     private Component playerMovement;
     private Component playerGolfer;
@@ -413,12 +409,12 @@ public partial class BirdieMod : MelonMod
 
     // ── Host Controls ─────────────────────────────────────────────────────────────
     private bool hostControlsActive;
-    private ulong hostAllowedFeatureMask = 0x3FFF; // bits 0-13 all on by default
+    private ulong hostAllowedFeatureMask = 0x7FFF; // bits 0-14 all on by default
 
     private bool IsFeatureAllowed(int featureBit)
     {
         if (!BirdieHostBridge.IsUnderHostControl) return true;
-        if (featureBit < 0) return false;
+        if (featureBit < 0) return true;
         return (BirdieHostBridge.ReceivedFeatureMask & (1UL << featureBit)) != 0;
     }
 

@@ -1,6 +1,5 @@
-using System;
+﻿using System;
 using System.Reflection;
-using MelonLoader;
 using UnityEngine;
 
 public partial class BirdieMod
@@ -32,7 +31,7 @@ public partial class BirdieMod
 
             if (wmType == null)
             {
-                MelonLogger.Warning("[Birdie] WindManager type not found");
+                BirdieLog.Warning("[Birdie] WindManager type not found");
                 return;
             }
 
@@ -40,7 +39,7 @@ public partial class BirdieMod
             UnityEngine.Object wmObj = UnityEngine.Object.FindObjectOfType(wmType);
             if (wmObj == null)
             {
-                MelonLogger.Warning("[Birdie] WindManager not found in scene");
+                BirdieLog.Warning("[Birdie] WindManager not found in scene");
                 return;
             }
 
@@ -51,14 +50,14 @@ public partial class BirdieMod
 
             if (wsField == null)
             {
-                MelonLogger.Warning("[Birdie] WindManager.windSettings field not found");
+                BirdieLog.Warning("[Birdie] WindManager.windSettings field not found");
                 return;
             }
 
             object ws = wsField.GetValue(wmObj);
             if (ws == null)
             {
-                MelonLogger.Warning("[Birdie] WindManager.windSettings value is null");
+                BirdieLog.Warning("[Birdie] WindManager.windSettings value is null");
                 return;
             }
 
@@ -74,12 +73,12 @@ public partial class BirdieMod
             }
             else
             {
-                MelonLogger.Warning("[Birdie] WindSettings.forceScale field not found");
+                BirdieLog.Warning("[Birdie] WindSettings.forceScale field not found");
             }
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Wind reflection error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Wind reflection error: " + ex.Message);
         }
     }
 
@@ -89,7 +88,7 @@ public partial class BirdieMod
         noWindEnabled = !noWindEnabled;
         InitializeWindExtrasReflection();
 
-        MelonLogger.Msg(string.Format("[Birdie] No Wind {0} | ws={1} field={2}",
+        BirdieLog.Msg(string.Format("[Birdie] No Wind {0} | ws={1} field={2}",
             noWindEnabled ? "ON" : "OFF",
             cachedWindSettingsInstance != null ? "OK" : "NULL",
             cachedWindForceScaleField   != null ? cachedWindForceScaleField.Name : "NULL"));
@@ -144,7 +143,7 @@ public partial class BirdieMod
     {
         if (!IsFeatureAllowed(4)) return;
         perfectShotEnabled = !perfectShotEnabled;
-        MelonLogger.Msg(perfectShotEnabled ? "[Birdie] Perfect Shot ON" : "[Birdie] Perfect Shot OFF");
+        BirdieLog.Msg(perfectShotEnabled ? "[Birdie] Perfect Shot ON" : "[Birdie] Perfect Shot OFF");
         MarkHudDirty();
     }
 
@@ -188,7 +187,7 @@ public partial class BirdieMod
                 if (!_perfectShotLogged)
                 {
                     _perfectShotLogged = true;
-                    MelonLogger.Msg("[Birdie] Perfect Shot backing field: " +
+                    BirdieLog.Msg("[Birdie] Perfect Shot backing field: " +
                         (swingNormalizedPowerBackingField != null
                             ? swingNormalizedPowerBackingField.Name
                             : "NOT FOUND") +
@@ -200,7 +199,7 @@ public partial class BirdieMod
                     {
                         if (f.FieldType == typeof(float))
                         {
-                            MelonLogger.Msg("[Birdie] float field: " + f.Name);
+                            BirdieLog.Msg("[Birdie] float field: " + f.Name);
                         }
                     }
                 }
@@ -213,7 +212,7 @@ public partial class BirdieMod
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Perfect Shot error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Perfect Shot error: " + ex.Message);
         }
     }
 
@@ -233,7 +232,7 @@ public partial class BirdieMod
             object ballSettings = GetGolfBallSettingsObject();
             if (ballSettings == null)
             {
-                MelonLogger.Warning("[Birdie] GolfBallSettings is null");
+                BirdieLog.Warning("[Birdie] GolfBallSettings is null");
                 return;
             }
 
@@ -250,12 +249,12 @@ public partial class BirdieMod
             }
             else
             {
-                MelonLogger.Warning("[Birdie] <LinearAirDragFactor>k__BackingField not found on " + t.Name);
+                BirdieLog.Warning("[Birdie] <LinearAirDragFactor>k__BackingField not found on " + t.Name);
             }
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] AirDrag reflection error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] AirDrag reflection error: " + ex.Message);
         }
     }
 
@@ -268,12 +267,12 @@ public partial class BirdieMod
         if (noAirDragEnabled)
         {
             ApplyNoAirDragState();
-            MelonLogger.Msg(string.Format("[Birdie] No Air Drag ON (saved={0:F5})", savedLinearAirDrag));
+            BirdieLog.Msg(string.Format("[Birdie] No Air Drag ON (saved={0:F5})", savedLinearAirDrag));
         }
         else
         {
             RestoreAirDragState();
-            MelonLogger.Msg("[Birdie] No Air Drag OFF");
+            BirdieLog.Msg("[Birdie] No Air Drag OFF");
         }
 
         MarkHudDirty();
@@ -348,7 +347,7 @@ public partial class BirdieMod
 
             if (gmType == null)
             {
-                MelonLogger.Warning("[Birdie] GameManager type not found");
+                BirdieLog.Warning("[Birdie] GameManager type not found");
                 return;
             }
 
@@ -358,14 +357,14 @@ public partial class BirdieMod
 
             if (cachedPlayerMovSettingsProperty == null)
             {
-                MelonLogger.Warning("[Birdie] GameManager.PlayerMovementSettings property not found");
+                BirdieLog.Warning("[Birdie] GameManager.PlayerMovementSettings property not found");
                 return;
             }
 
             object pms = cachedPlayerMovSettingsProperty.GetValue(null, null);
             if (pms == null)
             {
-                MelonLogger.Warning("[Birdie] PlayerMovementSettings value is null");
+                BirdieLog.Warning("[Birdie] PlayerMovementSettings value is null");
                 return;
             }
 
@@ -382,13 +381,13 @@ public partial class BirdieMod
             }
             else
             {
-                MelonLogger.Warning("[Birdie] <DefaultMoveSpeed>k__BackingField not found on " + pmsType.Name);
+                BirdieLog.Warning("[Birdie] <DefaultMoveSpeed>k__BackingField not found on " + pmsType.Name);
             }
 
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] MoveSpeed reflection error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] MoveSpeed reflection error: " + ex.Message);
         }
     }
 
@@ -401,12 +400,12 @@ public partial class BirdieMod
         if (speedMultiplierEnabled)
         {
             ApplySpeedMultiplierState();
-            MelonLogger.Msg(string.Format("[Birdie] Speed Multiplier ON (x{0:F1}, base={1:F2})", speedMultiplierFactor, savedDefaultMoveSpeed));
+            BirdieLog.Msg(string.Format("[Birdie] Speed Multiplier ON (x{0:F1}, base={1:F2})", speedMultiplierFactor, savedDefaultMoveSpeed));
         }
         else
         {
             RestoreSpeedState();
-            MelonLogger.Msg("[Birdie] Speed Multiplier OFF");
+            BirdieLog.Msg("[Birdie] Speed Multiplier OFF");
         }
 
         MarkHudDirty();
@@ -490,7 +489,7 @@ public partial class BirdieMod
 
             if (gmType == null || piType == null || isType == null)
             {
-                MelonLogger.Warning("[Birdie] Ammo: required types not found (GM=" +
+                BirdieLog.Warning("[Birdie] Ammo: required types not found (GM=" +
                     (gmType != null ? "ok" : "NULL") + " PI=" +
                     (piType != null ? "ok" : "NULL") + " IS=" +
                     (isType != null ? "ok" : "NULL") + ")");
@@ -528,11 +527,11 @@ public partial class BirdieMod
 
             if (ok)
             {
-                MelonLogger.Msg("[Birdie] Ammo inventory reflection ready");
+                BirdieLog.Msg("[Birdie] Ammo inventory reflection ready");
             }
             else
             {
-                MelonLogger.Warning("[Birdie] Ammo: one or more fields missing — " +
+                BirdieLog.Warning("[Birdie] Ammo: one or more fields missing — " +
                     "inv=" + (cachedLocalPlayerInventoryProperty != null ? "ok" : "NULL") +
                     " slots=" + (cachedInventorySlotsSyncListField != null ? "ok" : "NULL") +
                     " overrides=" + (cachedInventoryOverridesDictField != null ? "ok" : "NULL") +
@@ -542,7 +541,7 @@ public partial class BirdieMod
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Ammo inventory reflection error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Ammo inventory reflection error: " + ex.Message);
         }
     }
 
@@ -560,7 +559,7 @@ public partial class BirdieMod
         BirdieInfiniteAmmoBridge.EnsurePatchApplied();
         BirdieInfiniteAmmoBridge.IsActive = infiniteAmmoEnabled;
 
-        MelonLogger.Msg(infiniteAmmoEnabled ? "[Birdie] Infinite Item Usage ON" : "[Birdie] Infinite Item Usage OFF");
+        BirdieLog.Msg(infiniteAmmoEnabled ? "[Birdie] Infinite Item Usage ON" : "[Birdie] Infinite Item Usage OFF");
         MarkHudDirty();
     }
 
@@ -654,7 +653,7 @@ public partial class BirdieMod
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Infinite ammo tick error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Infinite ammo tick error: " + ex.Message);
         }
     }
 
@@ -684,7 +683,7 @@ public partial class BirdieMod
 
             if (gameSettingsType == null)
             {
-                MelonLogger.Warning("[Birdie] GameSettings type not found");
+                BirdieLog.Warning("[Birdie] GameSettings type not found");
                 return;
             }
 
@@ -694,14 +693,14 @@ public partial class BirdieMod
 
             if (allProp == null)
             {
-                MelonLogger.Warning("[Birdie] GameSettings.All property not found");
+                BirdieLog.Warning("[Birdie] GameSettings.All property not found");
                 return;
             }
 
             object allSettings = allProp.GetValue(null, null);
             if (allSettings == null)
             {
-                MelonLogger.Warning("[Birdie] GameSettings.All is null");
+                BirdieLog.Warning("[Birdie] GameSettings.All is null");
                 return;
             }
 
@@ -711,14 +710,14 @@ public partial class BirdieMod
 
             if (generalProp == null)
             {
-                MelonLogger.Warning("[Birdie] AllSettings.General property not found");
+                BirdieLog.Warning("[Birdie] AllSettings.General property not found");
                 return;
             }
 
             object generalSettings = generalProp.GetValue(allSettings, null);
             if (generalSettings == null)
             {
-                MelonLogger.Warning("[Birdie] AllSettings.General is null");
+                BirdieLog.Warning("[Birdie] AllSettings.General is null");
                 return;
             }
 
@@ -735,12 +734,12 @@ public partial class BirdieMod
             }
             else
             {
-                MelonLogger.Warning("[Birdie] screenshakeFactor field not found on GeneralSettings");
+                BirdieLog.Warning("[Birdie] screenshakeFactor field not found on GeneralSettings");
             }
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Screenshake reflection error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Screenshake reflection error: " + ex.Message);
         }
     }
 
@@ -753,12 +752,12 @@ public partial class BirdieMod
         if (noRecoilEnabled)
         {
             ApplyNoRecoilState();
-            MelonLogger.Msg(string.Format("[Birdie] No Recoil ON (saved shake={0:F3})", savedScreenshakeFactor));
+            BirdieLog.Msg(string.Format("[Birdie] No Recoil ON (saved shake={0:F3})", savedScreenshakeFactor));
         }
         else
         {
             RestoreRecoilState();
-            MelonLogger.Msg("[Birdie] No Recoil OFF");
+            BirdieLog.Msg("[Birdie] No Recoil OFF");
         }
 
         MarkHudDirty();
@@ -824,7 +823,7 @@ public partial class BirdieMod
 
             if (pmType == null)
             {
-                MelonLogger.Warning("[Birdie] No Knockback: PlayerMovement type not found");
+                BirdieLog.Warning("[Birdie] No Knockback: PlayerMovement type not found");
                 return;
             }
 
@@ -835,7 +834,7 @@ public partial class BirdieMod
 
             if (cachedKnockoutImmunityStatusField == null)
             {
-                MelonLogger.Warning("[Birdie] No Knockback: knockoutImmunityStatus field not found");
+                BirdieLog.Warning("[Birdie] No Knockback: knockoutImmunityStatus field not found");
                 return;
             }
 
@@ -847,15 +846,15 @@ public partial class BirdieMod
 
             if (cachedHasImmunityField == null)
             {
-                MelonLogger.Warning("[Birdie] No Knockback: hasImmunity field not found on " + koiType.Name);
+                BirdieLog.Warning("[Birdie] No Knockback: hasImmunity field not found on " + koiType.Name);
                 return;
             }
 
-            MelonLogger.Msg("[Birdie] Knockback immunity reflection ready (struct=" + koiType.Name + ")");
+            BirdieLog.Msg("[Birdie] Knockback immunity reflection ready (struct=" + koiType.Name + ")");
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Knockback immunity reflection error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Knockback immunity reflection error: " + ex.Message);
             knockbackImmunityReflectionReady = false;
         }
     }
@@ -866,7 +865,7 @@ public partial class BirdieMod
         noKnockbackEnabled = !noKnockbackEnabled;
         BirdieNoKnockbackBridge.EnsurePatchApplied();
         BirdieNoKnockbackBridge.IsActive = noKnockbackEnabled;
-        MelonLogger.Msg(noKnockbackEnabled ? "[Birdie] No Knockback ON" : "[Birdie] No Knockback OFF");
+        BirdieLog.Msg(noKnockbackEnabled ? "[Birdie] No Knockback ON" : "[Birdie] No Knockback OFF");
         MarkHudDirty();
     }
 
@@ -878,7 +877,7 @@ public partial class BirdieMod
         landmineImmunityEnabled = !landmineImmunityEnabled;
         BirdieLandmineImmunityBridge.EnsurePatchApplied();
         BirdieLandmineImmunityBridge.IsActive = landmineImmunityEnabled;
-        MelonLogger.Msg(landmineImmunityEnabled ? "[Birdie] Landmine Immunity ON" : "[Birdie] Landmine Immunity OFF");
+        BirdieLog.Msg(landmineImmunityEnabled ? "[Birdie] Landmine Immunity ON" : "[Birdie] Landmine Immunity OFF");
         MarkHudDirty();
     }
 
@@ -896,13 +895,13 @@ public partial class BirdieMod
                 gmType = asm.GetType("GameManager");
                 if (gmType != null) break;
             }
-            if (gmType == null) { MelonLogger.Warning("[Birdie] Lock-On: GameManager not found"); return; }
+            if (gmType == null) { BirdieLog.Warning("[Birdie] Lock-On: GameManager not found"); return; }
 
             PropertyInfo golfSettingsProp = gmType.GetProperty("GolfSettings", BindingFlags.Public | BindingFlags.Static);
-            if (golfSettingsProp == null) { MelonLogger.Warning("[Birdie] Lock-On: GolfSettings property not found"); return; }
+            if (golfSettingsProp == null) { BirdieLog.Warning("[Birdie] Lock-On: GolfSettings property not found"); return; }
 
             object golfSettings = golfSettingsProp.GetValue(null, null);
-            if (golfSettings == null) { MelonLogger.Warning("[Birdie] Lock-On: GolfSettings is null"); return; }
+            if (golfSettings == null) { BirdieLog.Warning("[Birdie] Lock-On: GolfSettings is null"); return; }
 
             Type gsType = golfSettings.GetType();
             // Try auto-property backing field first
@@ -913,17 +912,17 @@ public partial class BirdieMod
             if (cachedLockOnMaxDistanceField != null && cachedLockOnMaxDistanceField.FieldType == typeof(float))
             {
                 savedLockOnMaxDistance = (float)cachedLockOnMaxDistanceField.GetValue(golfSettings);
-                MelonLogger.Msg("[Birdie] Lock-On reflection ready, default dist=" + savedLockOnMaxDistance);
+                BirdieLog.Msg("[Birdie] Lock-On reflection ready, default dist=" + savedLockOnMaxDistance);
             }
             else
             {
-                MelonLogger.Warning("[Birdie] Lock-On: LockOnMaxDistance field not found");
+                BirdieLog.Warning("[Birdie] Lock-On: LockOnMaxDistance field not found");
                 cachedLockOnMaxDistanceField = null;
             }
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Lock-On reflection error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Lock-On reflection error: " + ex.Message);
         }
     }
 
@@ -938,7 +937,7 @@ public partial class BirdieMod
         else
             RestoreLockOnDistance();
 
-        MelonLogger.Msg(lockOnAnyDistanceEnabled ? "[Birdie] Lock-On Any Distance ON" : "[Birdie] Lock-On Any Distance OFF");
+        BirdieLog.Msg(lockOnAnyDistanceEnabled ? "[Birdie] Lock-On Any Distance ON" : "[Birdie] Lock-On Any Distance OFF");
         MarkHudDirty();
     }
 
@@ -1104,7 +1103,7 @@ internal static class BirdieNoKnockbackBridge
 
             if (hittableType == null)
             {
-                MelonLogger.Warning("[Birdie] No Knockback patch: Hittable type not found");
+                BirdieLog.Warning("[Birdie] No Knockback patch: Hittable type not found");
                 patchApplied = false;
                 return;
             }
@@ -1119,7 +1118,7 @@ internal static class BirdieNoKnockbackBridge
 
             if (hitWithItem == null && hitWithRocket == null)
             {
-                MelonLogger.Warning("[Birdie] No Knockback patch: neither Hittable target method found");
+                BirdieLog.Warning("[Birdie] No Knockback patch: neither Hittable target method found");
                 patchApplied = false;
                 return;
             }
@@ -1146,7 +1145,7 @@ internal static class BirdieNoKnockbackBridge
 
             if (harmonyType == null || harmonyMethodType == null)
             {
-                MelonLogger.Warning("[Birdie] No Knockback patch: HarmonyLib types not found");
+                BirdieLog.Warning("[Birdie] No Knockback patch: HarmonyLib types not found");
                 patchApplied = false;
                 return;
             }
@@ -1159,7 +1158,7 @@ internal static class BirdieNoKnockbackBridge
 
             if (prefixMethod == null)
             {
-                MelonLogger.Warning("[Birdie] No Knockback patch: Prefix method not found");
+                BirdieLog.Warning("[Birdie] No Knockback patch: Prefix method not found");
                 patchApplied = false;
                 return;
             }
@@ -1186,7 +1185,7 @@ internal static class BirdieNoKnockbackBridge
 
             if (patchMethod == null)
             {
-                MelonLogger.Warning("[Birdie] No Knockback patch: Harmony.Patch overload not found");
+                BirdieLog.Warning("[Birdie] No Knockback patch: Harmony.Patch overload not found");
                 patchApplied = false;
                 return;
             }
@@ -1197,19 +1196,19 @@ internal static class BirdieNoKnockbackBridge
             {
                 object[] args = BuildArgs(patchParams, hitWithItem, harmonyPrefix);
                 patchMethod.Invoke(harmony, args);
-                MelonLogger.Msg("[Birdie] No Knockback patch: registered prefix on Hittable.HitWithItem");
+                BirdieLog.Msg("[Birdie] No Knockback patch: registered prefix on Hittable.HitWithItem");
             }
 
             if (hitWithRocket != null)
             {
                 object[] args = BuildArgs(patchParams, hitWithRocket, harmonyPrefix);
                 patchMethod.Invoke(harmony, args);
-                MelonLogger.Msg("[Birdie] No Knockback patch: registered prefix on Hittable.HitWithRocketLauncherBackBlast");
+                BirdieLog.Msg("[Birdie] No Knockback patch: registered prefix on Hittable.HitWithRocketLauncherBackBlast");
             }
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] No Knockback patch error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] No Knockback patch error: " + ex.Message);
             patchApplied = false;
         }
     }
@@ -1282,7 +1281,7 @@ internal static class BirdieInfiniteAmmoBridge
 
             if (piType == null)
             {
-                MelonLogger.Warning("[Birdie] Infinite Ammo patch: PlayerInventory type not found");
+                BirdieLog.Warning("[Birdie] Infinite Ammo patch: PlayerInventory type not found");
                 patchApplied = false;
                 return;
             }
@@ -1293,7 +1292,7 @@ internal static class BirdieInfiniteAmmoBridge
 
             if (decrementMethod == null)
             {
-                MelonLogger.Warning("[Birdie] Infinite Ammo patch: DecrementUseFromSlotAt not found");
+                BirdieLog.Warning("[Birdie] Infinite Ammo patch: DecrementUseFromSlotAt not found");
                 patchApplied = false;
                 return;
             }
@@ -1320,7 +1319,7 @@ internal static class BirdieInfiniteAmmoBridge
 
             if (harmonyType == null || harmonyMethodType == null)
             {
-                MelonLogger.Warning("[Birdie] Infinite Ammo patch: HarmonyLib types not found");
+                BirdieLog.Warning("[Birdie] Infinite Ammo patch: HarmonyLib types not found");
                 patchApplied = false;
                 return;
             }
@@ -1333,7 +1332,7 @@ internal static class BirdieInfiniteAmmoBridge
 
             if (prefixMethod == null)
             {
-                MelonLogger.Warning("[Birdie] Infinite Ammo patch: Prefix method not found");
+                BirdieLog.Warning("[Birdie] Infinite Ammo patch: Prefix method not found");
                 patchApplied = false;
                 return;
             }
@@ -1360,7 +1359,7 @@ internal static class BirdieInfiniteAmmoBridge
 
             if (patchMethod == null)
             {
-                MelonLogger.Warning("[Birdie] Infinite Ammo patch: Harmony.Patch overload not found");
+                BirdieLog.Warning("[Birdie] Infinite Ammo patch: Harmony.Patch overload not found");
                 patchApplied = false;
                 return;
             }
@@ -1380,11 +1379,11 @@ internal static class BirdieInfiniteAmmoBridge
             }
 
             patchMethod.Invoke(harmony, args);
-            MelonLogger.Msg("[Birdie] Infinite Ammo patch: registered prefix on PlayerInventory.DecrementUseFromSlotAt");
+            BirdieLog.Msg("[Birdie] Infinite Ammo patch: registered prefix on PlayerInventory.DecrementUseFromSlotAt");
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Infinite Ammo patch error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Infinite Ammo patch error: " + ex.Message);
             patchApplied = false;
         }
     }
@@ -1439,7 +1438,7 @@ internal static class BirdieLandmineImmunityBridge
 
             if (hittableType == null)
             {
-                MelonLogger.Warning("[Birdie] Landmine Immunity patch: Hittable type not found");
+                BirdieLog.Warning("[Birdie] Landmine Immunity patch: Hittable type not found");
                 patchApplied = false;
                 return;
             }
@@ -1450,7 +1449,7 @@ internal static class BirdieLandmineImmunityBridge
 
             if (hitWithItem == null)
             {
-                MelonLogger.Warning("[Birdie] Landmine Immunity patch: HitWithItemInternal method not found");
+                BirdieLog.Warning("[Birdie] Landmine Immunity patch: HitWithItemInternal method not found");
                 patchApplied = false;
                 return;
             }
@@ -1489,7 +1488,7 @@ internal static class BirdieLandmineImmunityBridge
 
             if (harmonyType == null || harmonyMethodType == null)
             {
-                MelonLogger.Warning("[Birdie] Landmine Immunity patch: HarmonyLib types not found");
+                BirdieLog.Warning("[Birdie] Landmine Immunity patch: HarmonyLib types not found");
                 patchApplied = false;
                 return;
             }
@@ -1502,7 +1501,7 @@ internal static class BirdieLandmineImmunityBridge
 
             if (prefixMethod == null)
             {
-                MelonLogger.Warning("[Birdie] Landmine Immunity patch: Prefix method not found");
+                BirdieLog.Warning("[Birdie] Landmine Immunity patch: Prefix method not found");
                 patchApplied = false;
                 return;
             }
@@ -1529,7 +1528,7 @@ internal static class BirdieLandmineImmunityBridge
 
             if (patchMethod == null)
             {
-                MelonLogger.Warning("[Birdie] Landmine Immunity patch: Harmony.Patch overload not found");
+                BirdieLog.Warning("[Birdie] Landmine Immunity patch: Harmony.Patch overload not found");
                 patchApplied = false;
                 return;
             }
@@ -1549,11 +1548,11 @@ internal static class BirdieLandmineImmunityBridge
             }
 
             patchMethod.Invoke(harmony, args);
-            MelonLogger.Msg("[Birdie] Landmine Immunity patch: registered prefix on Hittable.HitWithItemInternal");
+            BirdieLog.Msg("[Birdie] Landmine Immunity patch: registered prefix on Hittable.HitWithItemInternal");
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Landmine Immunity patch error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Landmine Immunity patch error: " + ex.Message);
             patchApplied = false;
         }
     }
@@ -1604,14 +1603,14 @@ public partial class BirdieMod
 
             if (hotkeysType == null || gmType == null)
             {
-                MelonLogger.Warning("[Birdie] ExpandedSlots: Hotkeys or GameManager type not found");
+                BirdieLog.Warning("[Birdie] ExpandedSlots: Hotkeys or GameManager type not found");
                 return;
             }
 
             UnityEngine.Object hotkeyObj = UnityEngine.Object.FindObjectOfType(hotkeysType);
             if (hotkeyObj == null)
             {
-                MelonLogger.Warning("[Birdie] ExpandedSlots: Hotkeys instance not in scene");
+                BirdieLog.Warning("[Birdie] ExpandedSlots: Hotkeys instance not in scene");
                 return;
             }
             cachedExpandedHotkeysInstance = hotkeyObj;
@@ -1620,7 +1619,7 @@ public partial class BirdieMod
                 BindingFlags.NonPublic | BindingFlags.Instance);
             if (cachedHotkeyUisField == null)
             {
-                MelonLogger.Warning("[Birdie] ExpandedSlots: hotkeyUis field not found");
+                BirdieLog.Warning("[Birdie] ExpandedSlots: hotkeyUis field not found");
                 return;
             }
 
@@ -1628,14 +1627,14 @@ public partial class BirdieMod
                 BindingFlags.Public | BindingFlags.Static);
             if (piProp == null)
             {
-                MelonLogger.Warning("[Birdie] ExpandedSlots: PlayerInventorySettings property not found");
+                BirdieLog.Warning("[Birdie] ExpandedSlots: PlayerInventorySettings property not found");
                 return;
             }
 
             cachedExpandedPlayerInvSettings = piProp.GetValue(null);
             if (cachedExpandedPlayerInvSettings == null)
             {
-                MelonLogger.Warning("[Birdie] ExpandedSlots: PlayerInventorySettings is null");
+                BirdieLog.Warning("[Birdie] ExpandedSlots: PlayerInventorySettings is null");
                 return;
             }
 
@@ -1651,11 +1650,11 @@ public partial class BirdieMod
             }
 
             if (cachedMaxItemsBackingField == null)
-                MelonLogger.Warning("[Birdie] ExpandedSlots: MaxItems field not found");
+                BirdieLog.Warning("[Birdie] ExpandedSlots: MaxItems field not found");
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] ExpandedSlots init error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] ExpandedSlots init error: " + ex.Message);
         }
     }
 
@@ -1676,7 +1675,7 @@ public partial class BirdieMod
 
         if (cachedExpandedHotkeysInstance == null || cachedHotkeyUisField == null || cachedMaxItemsBackingField == null)
         {
-            MelonLogger.Warning("[Birdie] ExpandedSlots: reflection not ready, cannot apply");
+            BirdieLog.Warning("[Birdie] ExpandedSlots: reflection not ready, cannot apply");
             expandedSlotsEnabled = false;
             return;
         }
@@ -1686,7 +1685,7 @@ public partial class BirdieMod
             int currentMax = (int)cachedMaxItemsBackingField.GetValue(cachedExpandedPlayerInvSettings);
             if (currentMax >= ExpandedSlotsTarget)
             {
-                MelonLogger.Warning("[Birdie] ExpandedSlots: already at target or beyond (" + currentMax + ")");
+                BirdieLog.Warning("[Birdie] ExpandedSlots: already at target or beyond (" + currentMax + ")");
                 return;
             }
             savedOriginalMaxItems = currentMax;
@@ -1694,7 +1693,7 @@ public partial class BirdieMod
             System.Array currentArr = (System.Array)cachedHotkeyUisField.GetValue(cachedExpandedHotkeysInstance);
             if (currentArr == null || currentArr.Length < 2)
             {
-                MelonLogger.Warning("[Birdie] ExpandedSlots: hotkeyUis array is null or too small");
+                BirdieLog.Warning("[Birdie] ExpandedSlots: hotkeyUis array is null or too small");
                 expandedSlotsEnabled = false;
                 return;
             }
@@ -1790,12 +1789,12 @@ public partial class BirdieMod
             catch { }
 
             TryExpandServerInventorySlots();
-            MelonLogger.Msg("[Birdie] ExpandedSlots: expanded to " + ExpandedSlotsTarget
+            BirdieLog.Msg("[Birdie] ExpandedSlots: expanded to " + ExpandedSlotsTarget
                 + " slots (orig array len=" + currentArr.Length + ", currentMax=" + currentMax + ")");
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] ExpandedSlots apply error: " + ex.Message + "\n" + ex.StackTrace);
+            BirdieLog.Warning("[Birdie] ExpandedSlots apply error: " + ex.Message + "\n" + ex.StackTrace);
             expandedSlotsEnabled = false;
             RestoreExpandedSlots();
         }
@@ -1881,11 +1880,11 @@ public partial class BirdieMod
                 expandedCount++;
             }
 
-            MelonLogger.Msg("[Birdie] ExpandedSlots: expanded " + expandedCount + " player inventories to " + ExpandedSlotsTarget + " slots");
+            BirdieLog.Msg("[Birdie] ExpandedSlots: expanded " + expandedCount + " player inventories to " + ExpandedSlotsTarget + " slots");
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] ExpandedSlots server slots error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] ExpandedSlots server slots error: " + ex.Message);
         }
     }
 
@@ -1926,11 +1925,11 @@ public partial class BirdieMod
             }
             catch { }
 
-            MelonLogger.Msg("[Birdie] ExpandedSlots: restored to " + savedOriginalMaxItems + " slots");
+            BirdieLog.Msg("[Birdie] ExpandedSlots: restored to " + savedOriginalMaxItems + " slots");
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] ExpandedSlots restore error: " + ex.Message);
+            BirdieLog.Warning("[Birdie] ExpandedSlots restore error: " + ex.Message);
         }
     }
 }

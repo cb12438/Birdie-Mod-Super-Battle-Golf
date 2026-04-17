@@ -3,13 +3,12 @@ using UnityEngine.InputSystem;
 
 public partial class BirdieMod
 {
-    [System.Obsolete]
-    public override void OnApplicationStart()
+    internal void BirdieInit()
     {
         LoadOrCreateConfig();
     }
 
-    public override void OnUpdate()
+    internal void BirdieUpdate()
     {
         float currentTime = Time.time;
 
@@ -50,7 +49,7 @@ public partial class BirdieMod
 
     }
 
-    public override void OnLateUpdate()
+    internal void BirdieLateUpdate()
     {
         TickInfiniteAmmo();
         TickNoKnockback();

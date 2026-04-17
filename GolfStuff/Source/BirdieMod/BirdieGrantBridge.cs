@@ -1,5 +1,4 @@
-using MelonLoader;
-using System;
+﻿using System;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
@@ -102,7 +101,7 @@ internal static class BirdieGrantBridge
         {
             if (!CollectReflectionCaches())
             {
-                MelonLogger.Warning("[Birdie] Grant bridge: Mirror reflection incomplete — client item grant unavailable.");
+                BirdieLog.Warning("[Birdie] Grant bridge: Mirror reflection incomplete — client item grant unavailable.");
                 return;
             }
 
@@ -110,7 +109,7 @@ internal static class BirdieGrantBridge
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Grant bridge init: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Grant bridge init: " + ex.Message);
         }
     }
 
@@ -130,7 +129,7 @@ internal static class BirdieGrantBridge
             mirrorWriterPoolReturn == null ||
             mirrorWriterToArraySegment == null)
         {
-            MelonLogger.Warning("[Birdie] Item spawner: grant bridge not ready (reflection incomplete).");
+            BirdieLog.Warning("[Birdie] Item spawner: grant bridge not ready (reflection incomplete).");
             return;
         }
 
@@ -161,7 +160,7 @@ internal static class BirdieGrantBridge
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Item spawner (client bridge): " + ex.Message);
+            BirdieLog.Warning("[Birdie] Item spawner (client bridge): " + ex.Message);
         }
     }
 
@@ -182,7 +181,7 @@ internal static class BirdieGrantBridge
                 cachedServerTryAddItemMethod == null ||
                 cachedItemTypeEnumType == null)
             {
-                MelonLogger.Warning("[Birdie] Grant bridge server handler: reflection incomplete.");
+                BirdieLog.Warning("[Birdie] Grant bridge server handler: reflection incomplete.");
                 return;
             }
 
@@ -202,12 +201,12 @@ internal static class BirdieGrantBridge
 
             if (!added)
             {
-                MelonLogger.Warning("[Birdie] Item spawner (bridge server): inventory full or item invalid.");
+                BirdieLog.Warning("[Birdie] Item spawner (bridge server): inventory full or item invalid.");
             }
         }
         catch (Exception ex)
         {
-            MelonLogger.Warning("[Birdie] Grant bridge server handler: " + ex.Message);
+            BirdieLog.Warning("[Birdie] Grant bridge server handler: " + ex.Message);
         }
     }
 
@@ -391,7 +390,7 @@ internal static class BirdieGrantBridge
 
         if (playerInventoryType == null)
         {
-            MelonLogger.Warning("[Birdie] Grant bridge: PlayerInventory type not found.");
+            BirdieLog.Warning("[Birdie] Grant bridge: PlayerInventory type not found.");
             return;
         }
 
@@ -411,7 +410,7 @@ internal static class BirdieGrantBridge
 
         if (handlerMethod == null)
         {
-            MelonLogger.Warning("[Birdie] Grant bridge: ServerHandleGrantItem not found via reflection.");
+            BirdieLog.Warning("[Birdie] Grant bridge: ServerHandleGrantItem not found via reflection.");
             return;
         }
 
@@ -437,7 +436,7 @@ internal static class BirdieGrantBridge
 
         if (registeredCommandHash == 0)
         {
-            MelonLogger.Warning("[Birdie] Grant bridge: RegisterDelegate returned hash 0 — may indicate a collision.");
+            BirdieLog.Warning("[Birdie] Grant bridge: RegisterDelegate returned hash 0 — may indicate a collision.");
         }
     }
 

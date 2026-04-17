@@ -2,7 +2,7 @@
 setlocal EnableExtensions EnableDelayedExpansion
 cd /d "%~dp0"
 
-echo [1/4] Locating C# compiler...
+echo [1/5] Locating C# compiler...
 set "CSC_PATH="
 set "PF86=%ProgramFiles(x86)%"
 set "PF64=%ProgramFiles%"
@@ -25,7 +25,7 @@ if not defined CSC_PATH (
 )
 
 echo [INFO] Compiler: %CSC_PATH%
-echo [2/4] Resolving game directory...
+echo [2/5] Resolving game directory...
 
 set "GAME_ROOT=%~1"
 if not defined GAME_ROOT if defined SUPER_BATTLE_GOLF_DIR set "GAME_ROOT=%SUPER_BATTLE_GOLF_DIR%"
@@ -43,7 +43,6 @@ if not defined GAME_ROOT (
 if not defined GAME_ROOT (
     echo [ERROR] Game folder not found.
     echo [ERROR] Pass the game path as the first argument, set SUPER_BATTLE_GOLF_DIR, or create game_root.txt.
-    echo [ERROR] See BUILDING.md for examples.
     exit /b 1
 )
 
@@ -51,82 +50,121 @@ for %%I in ("%GAME_ROOT%") do set "GAME_ROOT=%%~fI"
 
 if not exist "%GAME_ROOT%\Super Battle Golf.exe" (
     echo [ERROR] Invalid game folder: %GAME_ROOT%
-    echo [ERROR] Super Battle Golf.exe was not found.
     exit /b 1
-)
-
-for %%I in (
-    "%GAME_ROOT%\MelonLoader\MelonLoader.dll"
-    "%GAME_ROOT%\Super Battle Golf_Data\Managed\UnityEngine.dll"
-    "%GAME_ROOT%\Super Battle Golf_Data\Managed\UnityEngine.CoreModule.dll"
-    "%GAME_ROOT%\Super Battle Golf_Data\Managed\UnityEngine.UIModule.dll"
-    "%GAME_ROOT%\Super Battle Golf_Data\Managed\UnityEngine.UI.dll"
-    "%GAME_ROOT%\Super Battle Golf_Data\Managed\Unity.InputSystem.dll"
-    "%GAME_ROOT%\Super Battle Golf_Data\Managed\Unity.TextMeshPro.dll"
-    "%GAME_ROOT%\Super Battle Golf_Data\Managed\UnityEngine.PhysicsModule.dll"
-    "%GAME_ROOT%\Super Battle Golf_Data\Managed\netstandard.dll"
-) do (
-    if not exist %%~I (
-        echo [ERROR] Missing required reference: %%~I
-        exit /b 1
-    )
 )
 
 echo [INFO] Game root: %GAME_ROOT%
-echo [3/4] Building mod...
 
-set "OUT_DLL=Mods\BirdieMod.dll"
-set "OUT_PDB=Mods\BirdieMod.pdb"
+REM ── Shared Unity references ─────────────────────────────────────────────────
+set "UNITY_REFS="
+for %%r in (
+    "UnityEngine.dll"
+    "UnityEngine.CoreModule.dll"
+    "UnityEngine.UIModule.dll"
+    "UnityEngine.UI.dll"
+    "Unity.InputSystem.dll"
+    "Unity.TextMeshPro.dll"
+    "UnityEngine.PhysicsModule.dll"
+    "UnityEngine.UIElementsModule.dll"
+    "UnityEngine.IMGUIModule.dll"
+    "UnityEngine.TextRenderingModule.dll"
+    "RosettaUI.dll"
+    "netstandard.dll"
+) do (
+    set "UNITY_REFS=!UNITY_REFS! /reference:"%GAME_ROOT%\Super Battle Golf_Data\Managed\%%~r""
+)
+
 set "SRC_ROOT=Source\BirdieMod"
-set "SRC_FILES="
+
+REM ═══════════════════════════════════════════════════════════════════════════
+REM  BUILD 1 — MelonLoader
+REM ═══════════════════════════════════════════════════════════════════════════
+echo [3/5] Building MelonLoader DLL...
+
+if not exist "%GAME_ROOT%\MelonLoader\MelonLoader.dll" (
+    echo [ERROR] MelonLoader not found: %GAME_ROOT%\MelonLoader\MelonLoader.dll
+    exit /b 1
+)
+
+set "ML_OUT_DLL=Mods\BirdieMod.dll"
+set "ML_OUT_PDB=Mods\BirdieMod.pdb"
+set "ML_SRC="
 
 for /R "%SRC_ROOT%" %%f in (*.cs) do (
-    set "SRC_FILES=!SRC_FILES! "%%f""
+    if /I not "%%~nxf"=="BirdieMod.BepInEntry.cs" (
+        set "ML_SRC=!ML_SRC! "%%f""
+    )
 )
 
-if not defined SRC_FILES (
-    echo [ERROR] No source files found under %SRC_ROOT%
-    exit /b 1
-)
+if exist "%ML_OUT_PDB%" del /q "%ML_OUT_PDB%"
 
-if exist "%OUT_PDB%" del /q "%OUT_PDB%"
-
-"%CSC_PATH%" /nologo /target:library /langversion:latest /optimize+ /deterministic+ /debug:portable /pdb:"%OUT_PDB%" /out:"%OUT_DLL%" ^
+"%CSC_PATH%" /nologo /target:library /langversion:latest /optimize+ /deterministic+ /debug:portable ^
+    /pdb:"%ML_OUT_PDB%" /out:"%ML_OUT_DLL%" ^
     /reference:"%GAME_ROOT%\MelonLoader\MelonLoader.dll" ^
-    /reference:"%GAME_ROOT%\Super Battle Golf_Data\Managed\UnityEngine.dll" ^
-    /reference:"%GAME_ROOT%\Super Battle Golf_Data\Managed\UnityEngine.CoreModule.dll" ^
-    /reference:"%GAME_ROOT%\Super Battle Golf_Data\Managed\UnityEngine.UIModule.dll" ^
-    /reference:"%GAME_ROOT%\Super Battle Golf_Data\Managed\UnityEngine.UI.dll" ^
-    /reference:"%GAME_ROOT%\Super Battle Golf_Data\Managed\Unity.InputSystem.dll" ^
-    /reference:"%GAME_ROOT%\Super Battle Golf_Data\Managed\Unity.TextMeshPro.dll" ^
-    /reference:"%GAME_ROOT%\Super Battle Golf_Data\Managed\UnityEngine.PhysicsModule.dll" ^
-    /reference:"%GAME_ROOT%\Super Battle Golf_Data\Managed\UnityEngine.UIElementsModule.dll" ^
-    /reference:"%GAME_ROOT%\Super Battle Golf_Data\Managed\UnityEngine.IMGUIModule.dll" ^
-    /reference:"%GAME_ROOT%\Super Battle Golf_Data\Managed\UnityEngine.TextRenderingModule.dll" ^
-    /reference:"%GAME_ROOT%\Super Battle Golf_Data\Managed\RosettaUI.dll" ^
-    /reference:"%GAME_ROOT%\Super Battle Golf_Data\Managed\netstandard.dll" ^
-    !SRC_FILES!
+    !UNITY_REFS! ^
+    !ML_SRC!
 
 if errorlevel 1 (
-    echo [ERROR] Build failed.
+    echo [ERROR] MelonLoader build failed.
     exit /b 1
 )
+echo [OK] MelonLoader: %ML_OUT_DLL%
 
-if exist "Mods\PlayerMenuMod.dll" (
-    del /q "Mods\PlayerMenuMod.dll"
+REM ═══════════════════════════════════════════════════════════════════════════
+REM  BUILD 2 — BepInEx
+REM ═══════════════════════════════════════════════════════════════════════════
+echo [4/5] Building BepInEx DLL...
+
+set "BEPINEX_REF=%GAME_ROOT%\BepInEx\core\BepInEx.dll"
+if not exist "%BEPINEX_REF%" (
+    REM Fallback to lib folder reference DLL
+    set "BEPINEX_REF=%~dp0lib\bepinex\BepInEx.dll"
 )
 
-echo [4/4] Build completed successfully.
-echo [OK] Output: %OUT_DLL%
-echo [OK] Symbols: %OUT_PDB%
+if not exist "%BEPINEX_REF%" (
+    echo [WARN] BepInEx.dll not found — skipping BepInEx build.
+    echo [WARN] Install BepInEx to %GAME_ROOT% or run compile_mod.bat from the game directory.
+    goto :deploy_ml
+)
 
-echo [5/5] Deploying to game Mods folder...
+set "BEPINEX_OUT_DLL=Mods\BirdieMod.BepInEx.dll"
+set "BEPINEX_OUT_PDB=Mods\BirdieMod.BepInEx.pdb"
+set "BEPINEX_SRC="
+
+for /R "%SRC_ROOT%" %%f in (*.cs) do (
+    if /I not "%%~nxf"=="BirdieMod.MelonEntry.cs" (
+        set "BEPINEX_SRC=!BEPINEX_SRC! "%%f""
+    )
+)
+
+if exist "%BEPINEX_OUT_PDB%" del /q "%BEPINEX_OUT_PDB%"
+
+"%CSC_PATH%" /nologo /target:library /langversion:latest /optimize+ /deterministic+ /debug:portable ^
+    /define:BEPINEX ^
+    /pdb:"%BEPINEX_OUT_PDB%" /out:"%BEPINEX_OUT_DLL%" ^
+    /reference:"%BEPINEX_REF%" ^
+    !UNITY_REFS! ^
+    !BEPINEX_SRC!
+
+if errorlevel 1 (
+    echo [ERROR] BepInEx build failed.
+    exit /b 1
+)
+echo [OK] BepInEx:    %BEPINEX_OUT_DLL%
+
+:deploy_ml
+REM ═══════════════════════════════════════════════════════════════════════════
+REM  DEPLOY MelonLoader DLL to game Mods folder
+REM ═══════════════════════════════════════════════════════════════════════════
+echo [5/5] Deploying MelonLoader DLL to game...
+if exist "Mods\PlayerMenuMod.dll" del /q "Mods\PlayerMenuMod.dll"
+
 set "GAME_MODS=%GAME_ROOT%\Mods"
 if not exist "%GAME_MODS%" (
     echo [WARN] Game Mods folder not found: %GAME_MODS%
     exit /b 0
 )
-copy /y "%OUT_DLL%" "%GAME_MODS%\" >nul
+copy /y "%ML_OUT_DLL%" "%GAME_MODS%\" >nul
 if errorlevel 1 (
     echo [WARN] Deploy failed — copy error.
 ) else (

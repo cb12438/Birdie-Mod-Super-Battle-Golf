@@ -1,0 +1,7 @@
+{
+    "name": "BirdieMod",
+    "version_number": "1.1.0",
+    "website_url": "https://github.com/cb12438/Birdie-Mod-Super-Battle-Golf",
+    "description": "Feature-rich host & client mod for Super Battle Golf. Host Controls let the lobby host enable/disable features for other modded players. Auto-Assist, expanded hotbar, no wind, speed boost, item upgrades, and 14+ toggleable features.",
+    "dependencies": []
+}

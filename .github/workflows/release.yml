@@ -16,16 +16,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Package release folder
+      - name: Package release zips
         run: |
           VERSION="${GITHUB_REF_NAME}"
-          cd GolfStuff/Release
-          zip -r "../../BirdieMod-${VERSION}.zip" \
+
+          cd Release.BepInEx
+          zip -r "../BirdieMod-BepInEx-${VERSION}.zip" \
+            manifest.json \
+            README.md \
+            icon.png \
+            BepInEx/
+          cd ..
+
+          cd Release.MelonLoader
+          zip -r "../BirdieMod-MelonLoader-${VERSION}.zip" \
             BirdieMod.dll \
-            BirdieModInstaller.exe \
-            BirdieModUninstaller.exe \
-            README.txt
-          echo "RELEASE_ZIP=BirdieMod-${VERSION}.zip" >> $GITHUB_ENV
+            README.md
+          cd ..
+
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Create GitHub Release
@@ -35,7 +43,7 @@ jobs:
           generate_release_notes: true
           prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') || contains(github.ref_name, 'test') }}
           files: |
-            ${{ env.RELEASE_ZIP }}
-            GolfStuff/Release/BirdieMod.dll
-            GolfStuff/Release/BirdieModInstaller.exe
-            GolfStuff/Release/BirdieModUninstaller.exe
+            BirdieMod-BepInEx-${{ env.VERSION }}.zip
+            BirdieMod-MelonLoader-${{ env.VERSION }}.zip
+            Release.BepInEx/BepInEx/plugins/BirdieMod.dll
+            Release.MelonLoader/BirdieMod.dll
