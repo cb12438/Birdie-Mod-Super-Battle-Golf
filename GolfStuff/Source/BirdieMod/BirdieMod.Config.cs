@@ -83,6 +83,7 @@ public partial class BirdieMod
         actualTrailColor = new Color(1f, 0.58f, 0.20f, 1f);
         predictedTrailColor = new Color(0.36f, 0.95f, 0.46f, 0.95f);
         frozenTrailColor = new Color(0.36f, 0.74f, 1f, 0.92f);
+        hostAllowedFeatureMask = 0x3FFF;
     }
 
     private void LoadConfigFromFile(string path)
@@ -173,6 +174,9 @@ public partial class BirdieMod
                 case "expanded_slots_key":
                     expandedSlotsKeyName = ParseKeyNameOrDefault(value, expandedSlotsKeyName);
                     break;
+                case "expanded_slots_all_players":
+                    expandedSlotsAllPlayers = ParseBoolOrDefault(value, expandedSlotsAllPlayers);
+                    break;
                 case "hud_show_bottom_bar":
                     hudShowBottomBar = ParseBoolOrDefault(value, hudShowBottomBar);
                     break;
@@ -241,6 +245,13 @@ public partial class BirdieMod
                     break;
                 case "frozen_trail_color":
                     frozenTrailColor = ParseColorOrDefault(value, frozenTrailColor);
+                    break;
+                case "hostallowedfeaturemask":
+                    ulong parsedMask;
+                    if (ulong.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsedMask))
+                    {
+                        hostAllowedFeatureMask = parsedMask;
+                    }
                     break;
             }
         }
@@ -458,6 +469,7 @@ public partial class BirdieMod
         builder.AppendLine("landmine_immunity_key=" + landmineImmunityKeyName);
         builder.AppendLine("lock_on_any_distance_key=" + lockOnAnyDistanceKeyName);
         builder.AppendLine("expanded_slots_key=" + expandedSlotsKeyName);
+        builder.AppendLine("expanded_slots_all_players=" + expandedSlotsAllPlayers.ToString().ToLowerInvariant());
         builder.AppendLine();
         builder.AppendLine("hud_show_bottom_bar=" + hudShowBottomBar.ToString().ToLowerInvariant());
         builder.AppendLine("hud_show_ball_distance=" + hudShowBallDistance.ToString().ToLowerInvariant());
@@ -487,6 +499,8 @@ public partial class BirdieMod
         builder.AppendLine("impact_preview_fps=" + ((int)impactPreviewTargetFps).ToString(System.Globalization.CultureInfo.InvariantCulture));
         builder.AppendLine("impact_preview_width=" + impactPreviewTextureWidth.ToString(System.Globalization.CultureInfo.InvariantCulture));
         builder.AppendLine("impact_preview_height=" + impactPreviewTextureHeight.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        builder.AppendLine();
+        builder.AppendLine("hostAllowedFeatureMask=" + hostAllowedFeatureMask.ToString(System.Globalization.CultureInfo.InvariantCulture));
         return builder.ToString();
     }
 

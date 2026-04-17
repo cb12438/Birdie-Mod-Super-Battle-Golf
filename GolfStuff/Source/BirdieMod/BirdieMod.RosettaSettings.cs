@@ -45,6 +45,7 @@ public partial class BirdieMod
     private Texture2D   _imTxDarker;
     private Texture2D   _imTxRed;
     private Texture2D   _imTxGreen;
+    private Texture2D   _imTxSeparator;
 
     private static Texture2D MakeTex(Color c)
     {
@@ -63,8 +64,9 @@ public partial class BirdieMod
         _imTxBlue   = MakeTex(new Color(0.22f, 0.50f, 0.90f, 1.00f));
         _imTxGrey   = MakeTex(new Color(0.20f, 0.20f, 0.25f, 1.00f));
         _imTxDarker = MakeTex(new Color(0.07f, 0.07f, 0.09f, 1.00f));
-        _imTxRed    = MakeTex(new Color(0.60f, 0.12f, 0.12f, 1.00f));
-        _imTxGreen  = MakeTex(new Color(0.16f, 0.45f, 0.20f, 1.00f));
+        _imTxRed       = MakeTex(new Color(0.60f, 0.12f, 0.12f, 1.00f));
+        _imTxGreen     = MakeTex(new Color(0.16f, 0.45f, 0.20f, 1.00f));
+        _imTxSeparator = MakeTex(new Color(1f, 1f, 1f, 0.06f));
 
         _imWindowStyle = new GUIStyle(GUI.skin.window);
         _imWindowStyle.normal.background   = _imTxDark;
@@ -188,14 +190,13 @@ public partial class BirdieMod
             CloseRosettaSettings();
 
         // thin separator below title
-        GUI.DrawTexture(new Rect(0, titleH, w, 1f), MakeTex(new Color(1f, 1f, 1f, 0.06f)));
+        GUI.DrawTexture(new Rect(0, titleH, w, 1f), _imTxSeparator);
 
         // ── Sidebar ────────────────────────────────────────────────────────
         GUI.DrawTexture(new Rect(0, titleH + 1f, sideW, h - titleH - 1f), _imTxDarker);
-        GUI.DrawTexture(new Rect(sideW, titleH + 1f, 1f, h - titleH - 1f),
-                        MakeTex(new Color(1f, 1f, 1f, 0.06f)));
+        GUI.DrawTexture(new Rect(sideW, titleH + 1f, 1f, h - titleH - 1f), _imTxSeparator);
 
-        string[] tabLabels = { "Features", "Keys", "HUD", "$", "Items" };
+        string[] tabLabels = { "Features", "Keys", "HUD", "$", "Items", "Net" };
         float tabH = 44f;
         for (int i = 0; i < tabLabels.Length; i++)
         {
@@ -218,6 +219,7 @@ public partial class BirdieMod
             case 2: DrawImHud(cw);      break;
             case 3: DrawImCredits(cw);  break;
             case 4: DrawImItems(cw);    break;
+            case 5: DrawImNetwork(cw);  break;
         }
         GUILayout.EndArea();
 
@@ -231,36 +233,57 @@ public partial class BirdieMod
         _imFeaturesScroll = GUILayout.BeginScrollView(_imFeaturesScroll);
 
         ImSectionHeader("CORE");
-        ImToggleRowWithDesc("Ice Immunity [" + iceToggleKeyLabel + "]",  iceImmunityEnabled,  "Slide on ice without slipping",                    () => ToggleIceImmunity());
-        ImToggleRowWithDesc("Shot Tracer",                                  tracersEnabled,       "Shows the ball's actual flight path",              () => { tracersEnabled = !tracersEnabled; SaveCurrentConfig(); MarkTrailVisualSettingsDirty(); MarkHudDirty(); });
-        ImToggleRowWithDesc("Assist [" + assistToggleKeyLabel + "]",        assistEnabled,        "Auto-aims and releases at the perfect moment",     () => ToggleAssist());
-        ImToggleRowWithDesc("Impact Preview",                               impactPreviewEnabled, "Preview exactly where your shot will land",        () => { impactPreviewEnabled = !impactPreviewEnabled; SaveCurrentConfig(); });
+        if (IsFeatureAllowed(0))
+            ImToggleRowWithDesc("Ice Immunity [" + iceToggleKeyLabel + "]",  iceImmunityEnabled,  "Slide on ice without slipping",                    () => ToggleIceImmunity());
+        if (IsFeatureAllowed(1))
+            ImToggleRowWithDesc("Shot Tracer",                                  tracersEnabled,       "Shows the ball's actual flight path",              () => { tracersEnabled = !tracersEnabled; SaveCurrentConfig(); MarkTrailVisualSettingsDirty(); MarkHudDirty(); });
+        if (IsFeatureAllowed(-1))
+            ImToggleRowWithDesc("Assist [" + assistToggleKeyLabel + "]",        assistEnabled,        "Auto-aims and releases at the perfect moment",     () => ToggleAssist());
+        if (IsFeatureAllowed(2))
+            ImToggleRowWithDesc("Impact Preview",                               impactPreviewEnabled, "Preview exactly where your shot will land",        () => { impactPreviewEnabled = !impactPreviewEnabled; SaveCurrentConfig(); });
 
         GUILayout.Space(6f);
         ImSectionHeader("EXTRAS");
-        ImToggleRowWithDesc("No Wind [" + noWindKeyLabel + "]",                  noWindEnabled,            "Removes wind deflection from your ball",                                          () => ToggleNoWind());
-        ImToggleRowWithDesc("Perfect Shot [" + perfectShotKeyLabel + "]",        perfectShotEnabled,       "Forces your swing into the perfect power zone",                                   () => TogglePerfectShot());
-        ImToggleRowWithDesc("No Air Drag [" + noAirDragKeyLabel + "]",           noAirDragEnabled,         "Removes air resistance — ball flies further",                                     () => ToggleNoAirDrag());
-        ImToggleRowWithDesc("Speed Boost [" + speedMultiplierKeyLabel + "]",     speedMultiplierEnabled,   "Multiplies your movement speed",                                                  () => ToggleSpeedMultiplier());
-        ImToggleRowWithDesc("Inf. Item Usage [" + infiniteAmmoKeyLabel + "]",    infiniteAmmoEnabled,      "Weapons and items never run out",                                                 () => ToggleInfiniteAmmo());
-        ImToggleRowWithDesc("No Recoil [" + noRecoilKeyLabel + "]",              noRecoilEnabled,          "Removes screen shake when firing weapons",                                        () => ToggleNoRecoil());
-        ImToggleRowWithDesc("No Knockback [" + noKnockbackKeyLabel + "]",        noKnockbackEnabled,       "Prevents weapons from flinging you back",                                         () => ToggleNoKnockback());
-        ImToggleRowWithDesc("Landmine Immunity [" + landmineImmunityKeyLabel + "]",  landmineImmunityEnabled,   "Walk over landmines without being hit",                                () => ToggleLandmineImmunity());
-        ImToggleRowWithDesc("Lock-On Any Dist. [" + lockOnAnyDistanceKeyLabel + "]", lockOnAnyDistanceEnabled,  "Lock-on targets golf balls at any range",                               () => ToggleLockOnAnyDistance());
-        ImToggleRowWithDesc("Expanded Slots [" + expandedSlotsKeyLabel + "]",        expandedSlotsEnabled,      "Expand hotbar to 8 total slots / keys 1-8 (host: real slots; client: UI only)", () => ToggleExpandedSlots());
-
-        GUILayout.Space(6f);
-        ImSectionHeader("SPEED FACTOR");
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("x" + speedMultiplierFactor.ToString("F1"), _imActionLabel, GUILayout.Width(36f));
-        float newFactor = GUILayout.HorizontalSlider(speedMultiplierFactor, 0.5f, 10f);
-        if (System.Math.Abs(newFactor - speedMultiplierFactor) > 0.01f)
+        if (IsFeatureAllowed(3))
+            ImToggleRowWithDesc("No Wind [" + noWindKeyLabel + "]",                  noWindEnabled,            "Removes wind deflection from your ball",                                          () => ToggleNoWind());
+        if (IsFeatureAllowed(4))
+            ImToggleRowWithDesc("Perfect Shot [" + perfectShotKeyLabel + "]",        perfectShotEnabled,       "Forces your swing into the perfect power zone",                                   () => TogglePerfectShot());
+        if (IsFeatureAllowed(5))
+            ImToggleRowWithDesc("No Air Drag [" + noAirDragKeyLabel + "]",           noAirDragEnabled,         "Removes air resistance — ball flies further",                                     () => ToggleNoAirDrag());
+        if (IsFeatureAllowed(6))
+            ImToggleRowWithDesc("Speed Boost [" + speedMultiplierKeyLabel + "]",     speedMultiplierEnabled,   "Multiplies your movement speed",                                                  () => ToggleSpeedMultiplier());
+        if (IsFeatureAllowed(7))
+            ImToggleRowWithDesc("Inf. Item Usage [" + infiniteAmmoKeyLabel + "]",    infiniteAmmoEnabled,      "Weapons and items never run out",                                                 () => ToggleInfiniteAmmo());
+        if (IsFeatureAllowed(8))
+            ImToggleRowWithDesc("No Recoil [" + noRecoilKeyLabel + "]",              noRecoilEnabled,          "Removes screen shake when firing weapons",                                        () => ToggleNoRecoil());
+        if (IsFeatureAllowed(9))
+            ImToggleRowWithDesc("No Knockback [" + noKnockbackKeyLabel + "]",        noKnockbackEnabled,       "Prevents weapons from flinging you back",                                         () => ToggleNoKnockback());
+        if (IsFeatureAllowed(10))
+            ImToggleRowWithDesc("Landmine Immunity [" + landmineImmunityKeyLabel + "]",  landmineImmunityEnabled,   "Walk over landmines without being hit",                                () => ToggleLandmineImmunity());
+        if (IsFeatureAllowed(11))
+            ImToggleRowWithDesc("Lock-On Any Dist. [" + lockOnAnyDistanceKeyLabel + "]", lockOnAnyDistanceEnabled,  "Lock-on targets golf balls at any range",                               () => ToggleLockOnAnyDistance());
+        if (IsFeatureAllowed(12))
         {
-            speedMultiplierFactor = Mathf.Round(newFactor * 10f) / 10f;
-            if (speedMultiplierEnabled) ApplySpeedMultiplierState();
-            SaveCurrentConfig();
+            ImToggleRowWithDesc("Expanded Slots [" + expandedSlotsKeyLabel + "]", expandedSlotsEnabled, "Expand hotbar to 8 total slots / keys 1-8", () => ToggleExpandedSlots());
+            if (expandedSlotsEnabled && IsNetworkHost())
+                ImToggleRow("  Apply to all players", expandedSlotsAllPlayers, () => { expandedSlotsAllPlayers = !expandedSlotsAllPlayers; SaveCurrentConfig(); if (expandedSlotsEnabled) TryExpandServerInventorySlotsPublic(); });
         }
-        GUILayout.EndHorizontal();
+
+        if (IsFeatureAllowed(6))
+        {
+            GUILayout.Space(6f);
+            ImSectionHeader("SPEED FACTOR");
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("x" + speedMultiplierFactor.ToString("F1"), _imActionLabel, GUILayout.Width(36f));
+            float newFactor = GUILayout.HorizontalSlider(speedMultiplierFactor, 0.5f, 10f);
+            if (System.Math.Abs(newFactor - speedMultiplierFactor) > 0.01f)
+            {
+                speedMultiplierFactor = Mathf.Round(newFactor * 10f) / 10f;
+                if (speedMultiplierEnabled) ApplySpeedMultiplierState();
+                SaveCurrentConfig();
+            }
+            GUILayout.EndHorizontal();
+        }
 
         GUILayout.EndScrollView();
     }
@@ -337,10 +360,6 @@ public partial class BirdieMod
         if (GUILayout.Button("Grant " + creditsGrantAmount + " Credits", _imButton, GUILayout.Height(34f)))
             GrantCredits(creditsGrantAmount);
 
-        GUILayout.Space(16f);
-        ImSectionHeader("COMMUNITY");
-        if (GUILayout.Button("Join our Discord", _imButton, GUILayout.Height(34f)))
-            Application.OpenURL("https://discord.gg/EaCRS6TBH9");
     }
 
     // ── Items tab ─────────────────────────────────────────────────────────────
@@ -377,6 +396,84 @@ public partial class BirdieMod
         }
 
         GUILayout.EndScrollView();
+    }
+
+    // ── Network tab ──────────────────────────────────────────────────────────
+
+    private Vector2 _imNetScroll;
+
+    private void DrawImNetwork(float w)
+    {
+        _imNetScroll = GUILayout.BeginScrollView(_imNetScroll);
+
+        bool isHost = IsNetworkHost();
+
+        if (isHost)
+        {
+            ImSectionHeader("HOST CONTROLS");
+            ImToggleRow("Host Controls", hostControlsActive, () => SetHostControlsActive(!hostControlsActive));
+
+            if (hostControlsActive)
+            {
+                GUILayout.Space(4f);
+                ImSectionHeader("ALLOWED FEATURES");
+                ImHostFeatureToggle("Ice Immunity",        0);
+                ImHostFeatureToggle("Shot Tracer",         1);
+                ImHostFeatureToggle("Impact Preview",      2);
+                ImHostFeatureToggle("No Wind",             3);
+                ImHostFeatureToggle("Perfect Shot",        4);
+                ImHostFeatureToggle("No Air Drag",         5);
+                ImHostFeatureToggle("Speed Multiplier",    6);
+                ImHostFeatureToggle("Infinite Item Usage", 7);
+                ImHostFeatureToggle("No Recoil",           8);
+                ImHostFeatureToggle("No Knockback",        9);
+                ImHostFeatureToggle("Landmine Immunity",   10);
+                ImHostFeatureToggle("Lock-On Any Dist.",   11);
+                ImHostFeatureToggle("Expanded Slots",      12);
+                ImHostFeatureToggle("Coffee Boost",        13);
+            }
+        }
+        else
+        {
+            if (BirdieHostBridge.IsUnderHostControl)
+            {
+                GUIStyle bannerStyle = new GUIStyle(_imInfoLabel);
+                bannerStyle.normal.textColor = new Color(1f, 0.75f, 0.20f, 1f);
+                GUILayout.Label("Host Controls Active", bannerStyle);
+                GUILayout.Space(4f);
+                GUILayout.Label("Some features may be restricted by the lobby host.", _imInfoLabel);
+            }
+            else
+            {
+                GUILayout.Label("No host control active. All features available.", _imInfoLabel);
+            }
+        }
+
+        GUILayout.EndScrollView();
+    }
+
+    private void ImHostFeatureToggle(string label, int bit)
+    {
+        bool enabled = (hostAllowedFeatureMask & (1UL << bit)) != 0;
+        ImToggleRow(label, enabled, () => SetHostFeatureBit(bit, !enabled));
+    }
+
+    private bool IsNetworkHost()
+    {
+        try
+        {
+            foreach (System.Reflection.Assembly asm in System.AppDomain.CurrentDomain.GetAssemblies())
+            {
+                System.Type nsType = asm.GetType("Mirror.NetworkServer");
+                if (nsType == null) continue;
+                System.Reflection.PropertyInfo p = nsType.GetProperty("active",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (p != null) return (bool)p.GetValue(null);
+                break;
+            }
+        }
+        catch { }
+        return false;
     }
 
     // ── Shared row helpers ────────────────────────────────────────────────────

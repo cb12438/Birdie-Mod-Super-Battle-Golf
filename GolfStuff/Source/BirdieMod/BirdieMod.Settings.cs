@@ -1695,6 +1695,7 @@ public partial class BirdieMod
 
     private void ToggleIceImmunity()
     {
+        if (!IsFeatureAllowed(0)) return;
         iceImmunityEnabled = !iceImmunityEnabled;
 
         if (iceImmunityEnabled)

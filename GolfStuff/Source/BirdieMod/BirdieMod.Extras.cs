@@ -85,6 +85,7 @@ public partial class BirdieMod
 
     private void ToggleNoWind()
     {
+        if (!IsFeatureAllowed(3)) return;
         noWindEnabled = !noWindEnabled;
         InitializeWindExtrasReflection();
 
@@ -141,6 +142,7 @@ public partial class BirdieMod
 
     private void TogglePerfectShot()
     {
+        if (!IsFeatureAllowed(4)) return;
         perfectShotEnabled = !perfectShotEnabled;
         MelonLogger.Msg(perfectShotEnabled ? "[Birdie] Perfect Shot ON" : "[Birdie] Perfect Shot OFF");
         MarkHudDirty();
@@ -259,6 +261,7 @@ public partial class BirdieMod
 
     private void ToggleNoAirDrag()
     {
+        if (!IsFeatureAllowed(5)) return;
         noAirDragEnabled = !noAirDragEnabled;
         InitializeAirDragExtrasReflection();
 
@@ -391,6 +394,7 @@ public partial class BirdieMod
 
     private void ToggleSpeedMultiplier()
     {
+        if (!IsFeatureAllowed(6)) return;
         speedMultiplierEnabled = !speedMultiplierEnabled;
         InitializeMoveSpeedExtrasReflection();
 
@@ -544,6 +548,7 @@ public partial class BirdieMod
 
     private void ToggleInfiniteAmmo()
     {
+        if (!IsFeatureAllowed(7)) return;
         infiniteAmmoEnabled = !infiniteAmmoEnabled;
 
         if (!infiniteAmmoEnabled)
@@ -741,6 +746,7 @@ public partial class BirdieMod
 
     private void ToggleNoRecoil()
     {
+        if (!IsFeatureAllowed(8)) return;
         noRecoilEnabled = !noRecoilEnabled;
         InitializeScreenshakeExtrasReflection();
 
@@ -856,6 +862,7 @@ public partial class BirdieMod
 
     private void ToggleNoKnockback()
     {
+        if (!IsFeatureAllowed(9)) return;
         noKnockbackEnabled = !noKnockbackEnabled;
         BirdieNoKnockbackBridge.EnsurePatchApplied();
         BirdieNoKnockbackBridge.IsActive = noKnockbackEnabled;
@@ -867,6 +874,7 @@ public partial class BirdieMod
 
     private void ToggleLandmineImmunity()
     {
+        if (!IsFeatureAllowed(10)) return;
         landmineImmunityEnabled = !landmineImmunityEnabled;
         BirdieLandmineImmunityBridge.EnsurePatchApplied();
         BirdieLandmineImmunityBridge.IsActive = landmineImmunityEnabled;
@@ -921,6 +929,7 @@ public partial class BirdieMod
 
     private void ToggleLockOnAnyDistance()
     {
+        if (!IsFeatureAllowed(11)) return;
         lockOnAnyDistanceEnabled = !lockOnAnyDistanceEnabled;
         InitializeLockOnReflection();
 
@@ -1652,6 +1661,7 @@ public partial class BirdieMod
 
     private void ToggleExpandedSlots()
     {
+        if (!IsFeatureAllowed(12)) return;
         expandedSlotsEnabled = !expandedSlotsEnabled;
         if (expandedSlotsEnabled)
             ApplyExpandedSlots();
@@ -1791,11 +1801,30 @@ public partial class BirdieMod
         }
     }
 
+    private void TryExpandServerInventorySlotsPublic() => TryExpandServerInventorySlots();
+
+    private Component GetLocalPlayerInventoryComponent(Type piType)
+    {
+        try
+        {
+            Type gmType = null;
+            foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                gmType = asm.GetType("GameManager");
+                if (gmType != null) break;
+            }
+            if (gmType == null) return null;
+            PropertyInfo p = gmType.GetProperty("LocalPlayerInventory", BindingFlags.Public | BindingFlags.Static);
+            return p?.GetValue(null) as Component;
+        }
+        catch { return null; }
+    }
+
     private void TryExpandServerInventorySlots()
     {
         try
         {
-            // Check if we're the server via NetworkServer.active (Mirror static bool)
+            // Only run on the server/host
             bool isServer = false;
             foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
             {
@@ -1806,57 +1835,53 @@ public partial class BirdieMod
                     isServer = (bool)activeProp.GetValue(null);
                 break;
             }
-
             if (!isServer) return;
 
-            // Get LocalPlayerInventory via GameManager
-            Type gmType = null;
-            foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                gmType = asm.GetType("GameManager");
-                if (gmType != null) break;
-            }
-            if (gmType == null) return;
-
-            PropertyInfo localInvProp = gmType.GetProperty("LocalPlayerInventory", BindingFlags.Public | BindingFlags.Static);
-            if (localInvProp == null) return;
-
-            Component localInv = (Component)localInvProp.GetValue(null);
-            if (localInv == null) return;
-
-            // Get the slots SyncList field
-            FieldInfo slotsField = localInv.GetType().GetField("slots",
-                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            if (slotsField == null) return;
-
-            object slots = slotsField.GetValue(localInv);
-            if (slots == null) return;
-
-            // Get current count
-            PropertyInfo countProp = slots.GetType().GetProperty("Count");
-            if (countProp == null) return;
-            int currentCount = (int)countProp.GetValue(slots);
-
-            // Add empty slots up to ExpandedSlotsTarget
-            if (currentCount >= ExpandedSlotsTarget) return;
-
-            System.Reflection.MethodInfo addMethod = slots.GetType().GetMethod("Add");
-            if (addMethod == null) return;
-
+            // Resolve PlayerInventory type and InventorySlot type
+            Type piType = null;
             Type invSlotType = null;
             foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
             {
-                invSlotType = asm.GetType("InventorySlot");
-                if (invSlotType != null) break;
+                if (piType == null) piType = asm.GetType("PlayerInventory");
+                if (invSlotType == null) invSlotType = asm.GetType("InventorySlot");
+                if (piType != null && invSlotType != null) break;
             }
-            if (invSlotType == null) return;
+            if (piType == null || invSlotType == null) return;
 
             object emptySlot = System.Activator.CreateInstance(invSlotType);
-            int toAdd = ExpandedSlotsTarget - currentCount;
-            for (int i = 0; i < toAdd; i++)
-                addMethod.Invoke(slots, new object[] { emptySlot });
 
-            MelonLogger.Msg("[Birdie] ExpandedSlots: added " + toAdd + " server slots");
+            // Expand inventories — all players or just local depending on setting
+            UnityEngine.Object[] allInvs = expandedSlotsAllPlayers
+                ? UnityEngine.Object.FindObjectsOfType(piType)
+                : new UnityEngine.Object[] { GetLocalPlayerInventoryComponent(piType) };
+            int expandedCount = 0;
+            foreach (UnityEngine.Object invObj in allInvs)
+            {
+                Component inv = invObj as Component;
+                if (inv == null) continue;
+
+                FieldInfo slotsField = inv.GetType().GetField("slots",
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (slotsField == null) continue;
+
+                object slots = slotsField.GetValue(inv);
+                if (slots == null) continue;
+
+                PropertyInfo countProp = slots.GetType().GetProperty("Count");
+                if (countProp == null) continue;
+                int currentCount = (int)countProp.GetValue(slots);
+                if (currentCount >= ExpandedSlotsTarget) continue;
+
+                MethodInfo addMethod = slots.GetType().GetMethod("Add");
+                if (addMethod == null) continue;
+
+                int toAdd = ExpandedSlotsTarget - currentCount;
+                for (int i = 0; i < toAdd; i++)
+                    addMethod.Invoke(slots, new object[] { emptySlot });
+                expandedCount++;
+            }
+
+            MelonLogger.Msg("[Birdie] ExpandedSlots: expanded " + expandedCount + " player inventories to " + ExpandedSlotsTarget + " slots");
         }
         catch (Exception ex)
         {

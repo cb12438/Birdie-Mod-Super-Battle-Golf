@@ -18,6 +18,7 @@ public partial class BirdieMod
         // EnsureInitialized is idempotent — after the first run it returns
         // immediately with a single bool check.
         BirdieGrantBridge.EnsureInitialized();
+        BirdieHostBridge.EnsureHandlersRegistered();
 
         PollDispenserPickup();
         PollCrateReturn();
@@ -213,6 +214,7 @@ public partial class BirdieMod
 
     private void ToggleAssist()
     {
+        if (!IsFeatureAllowed(-1)) return;
         assistEnabled = !assistEnabled;
         MarkHudDirty();
 
@@ -232,6 +234,7 @@ public partial class BirdieMod
 
     private void AddCoffeeBoost()
     {
+        if (!IsFeatureAllowed(13)) return;
         if (playerMovement == null || addSpeedBoostMethod == null)
         {
             ResolvePlayerContext();

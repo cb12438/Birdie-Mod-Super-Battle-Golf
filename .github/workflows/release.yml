@@ -1,0 +1,41 @@
+name: Publish Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Package release folder
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          cd GolfStuff/Release
+          zip -r "../../BirdieMod-${VERSION}.zip" \
+            BirdieMod.dll \
+            BirdieModInstaller.exe \
+            BirdieModUninstaller.exe \
+            README.txt
+          echo "RELEASE_ZIP=BirdieMod-${VERSION}.zip" >> $GITHUB_ENV
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "BirdieMod ${{ env.VERSION }}"
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') || contains(github.ref_name, 'test') }}
+          files: |
+            ${{ env.RELEASE_ZIP }}
+            GolfStuff/Release/BirdieMod.dll
+            GolfStuff/Release/BirdieModInstaller.exe
+            GolfStuff/Release/BirdieModUninstaller.exe

@@ -397,6 +397,7 @@ public partial class BirdieMod : MelonMod
     private string expandedSlotsKeyLabel = "U";
     private Key expandedSlotsKey = Key.U;
     private bool expandedSlotsEnabled;
+    private bool expandedSlotsAllPlayers = true;
     private const int ExpandedSlotsTarget = 7;
     private bool expandedSlotsReflectionInitialized;
     private object cachedExpandedHotkeysInstance;
@@ -409,4 +410,32 @@ public partial class BirdieMod : MelonMod
     private Vector2 savedSlotParentSizeDelta;
     private bool savedSlotParentMaskEnabled;
     private Transform savedSlotParentTransform;
+
+    // ── Host Controls ─────────────────────────────────────────────────────────────
+    private bool hostControlsActive;
+    private ulong hostAllowedFeatureMask = 0x3FFF; // bits 0-13 all on by default
+
+    private bool IsFeatureAllowed(int featureBit)
+    {
+        if (!BirdieHostBridge.IsUnderHostControl) return true;
+        if (featureBit < 0) return false;
+        return (BirdieHostBridge.ReceivedFeatureMask & (1UL << featureBit)) != 0;
+    }
+
+    private void SetHostControlsActive(bool active)
+    {
+        hostControlsActive = active;
+        BirdieHostBridge.BroadcastToClients(active, active ? hostAllowedFeatureMask : ulong.MaxValue);
+        MarkHudDirty();
+    }
+
+    private void SetHostFeatureBit(int bit, bool enabled)
+    {
+        if (enabled)
+            hostAllowedFeatureMask |= (1UL << bit);
+        else
+            hostAllowedFeatureMask &= ~(1UL << bit);
+        if (hostControlsActive)
+            BirdieHostBridge.BroadcastToClients(true, hostAllowedFeatureMask);
+    }
 }
