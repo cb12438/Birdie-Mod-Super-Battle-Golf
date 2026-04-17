@@ -1,5 +1,5 @@
 # Birdie Mod
-**Version 1.1.0** — Super Battle Golf | BepInEx
+**Version 1.2.0** — Super Battle Golf | BepInEx
 
 > A feature-rich client and host mod that gives you full control over your round. Works solo, in private lobbies, or with friends. Every feature is individually toggleable — turn on what you want, leave off what you don't.
 

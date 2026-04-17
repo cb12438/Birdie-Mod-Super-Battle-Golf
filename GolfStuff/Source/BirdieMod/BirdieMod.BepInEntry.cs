@@ -3,7 +3,7 @@ using BepInEx.Logging;
 
 // BepInEx entry point — compiled only in the BepInEx build.
 // Wires BirdieLog / BirdieCoroutine and bridges Unity lifecycle methods.
-[BepInPlugin("com.cb12438.birdiemod", "Birdie Mod", "1.1.0")]
+[BepInPlugin("com.cb12438.birdiemod", "Birdie Mod", "1.2.0")]
 public partial class BirdieMod : BaseUnityPlugin
 {
     private new ManualLogSource Logger;

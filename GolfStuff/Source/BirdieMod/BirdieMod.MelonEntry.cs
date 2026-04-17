@@ -1,6 +1,6 @@
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(BirdieMod), "Birdie Mod", "1.1.0", "Cb12438")]
+[assembly: MelonInfo(typeof(BirdieMod), "Birdie Mod", "1.2.0", "Cb12438")]
 [assembly: MelonGame]
 
 // MelonLoader entry point — compiled only in the MelonLoader build.
