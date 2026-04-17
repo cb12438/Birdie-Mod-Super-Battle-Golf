@@ -1,20 +1,19 @@
-# ── Claude Code & AI tooling ─────────────────────────────────────────────────
+# Dev tooling
 .claude/
 .claude-flow/
 .swarm/
 ruflo/
 .mcp.json
 
-# ── Game source (decompiled — do not distribute) ──────────────────────────────
+# Game source (decompiled — do not distribute)
 GameSource/
 
-# ── Release folder is public (installer + DLL for end users) ─────────────────
-# Exclude only the analyzer README (internal tool artifact)
+# Release exclusions
 GolfStuff/Release/README-ANALYZER.txt
 GolfStuff/Release/Source/
 GolfStuff/Release.rar
 
-# ── Build intermediates ───────────────────────────────────────────────────────
+# Build output
 GolfStuff/Mods/
 GolfStuff/obj/
 GolfStuff/Installer/_PayloadStage/
@@ -23,18 +22,16 @@ GolfStuff/Installer/*.exe
 GolfStuff/Installer/*.pdb
 GolfStuff/BirdieMod.zip
 GolfStuff/build_output.txt
-
-# ── RosettaUI build artefacts (game already ships RosettaUI.dll) ──────────────
 GolfStuff/package/
 GolfStuff/rosettaui.tgz
 GolfStuff/rosettaui_runtime_files.txt
 GolfStuff/RosettaUI.csproj
 GolfStuff/build_rosettaui.bat
 
-# ── Local config (machine-specific game path) ────────────────────────────────
+# Local config
 GolfStuff/game_root.txt
 
-# ── OS / editor junk ─────────────────────────────────────────────────────────
+# OS / editor
 .DS_Store
 Thumbs.db
 desktop.ini
