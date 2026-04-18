@@ -29,6 +29,14 @@ public partial class BirdieMod
     private bool     _lightningStrikePending;
     private Vector3  _pendingLightningStrikePosition;
 
+    // ── Auto weather ──────────────────────────────────────────────────────────
+    internal bool   autoWeatherEnabled;
+    internal int    autoWeatherChance  = 40;   // 0-100 %
+    // per-type enabled flags (index 0 = RainLight … 7 = Tornado)
+    internal int[]  autoWeatherChances = { 50, 35, 20, 40, 25, 10, 15, 5 };
+    private  bool   _holeEventSubscribed;
+    private  float  _tornadoFlingNextTime;
+
     // ── Weather reflection cache ──────────────────────────────────────────────
     private bool         _wAirDragReady;
     private FieldInfo    _wAirDragField;
@@ -55,7 +63,10 @@ public partial class BirdieMod
         _tornadoPositionSet = false;
         _gustRunning = false;
         _lightningRunning = false;
+        _wAirDragReady = false;  // reset so drag reflection retries on next weather start
         BirdieWeatherBridge.EnsureHandlersRegistered();
+        BirdieCoroutine.Start(LoadWeatherSounds());
+        SubscribeHoleChangeEvent();
     }
 
     internal void WeatherSystemUpdate()
@@ -105,16 +116,15 @@ public partial class BirdieMod
             || !_tornadoPositionSet || playerMovement == null) return;
 
         float dist = Vector3.Distance(playerMovement.transform.position, _tornadoWorldPosition);
-        if (dist >= 8f) return;
+        if (dist >= 12f) return;
+        if (Time.time < _tornadoFlingNextTime) return;
 
+        _tornadoFlingNextTime = Time.time + 1.2f;
         try
         {
-            Rigidbody rb = playerMovement.GetComponent<Rigidbody>();
             Vector3 outward = (playerMovement.transform.position - _tornadoWorldPosition).normalized;
-            if (rb != null)
-                rb.AddForce((Vector3.up * 20f + outward * 12f) * Time.deltaTime * 60f, ForceMode.Force);
-            else
-                TrySetVelocity(playerMovement, Vector3.up * 8f + outward * 5f);
+            Vector3 fling   = Vector3.up * 18f + outward * 14f;
+            FlingPlayer(playerMovement, fling);
         }
         catch (Exception ex) { BirdieLog.Warning("[Birdie] Tornado fling: " + ex.Message); }
     }
@@ -162,24 +172,31 @@ public partial class BirdieMod
         float wind = 1f;
         switch (t)
         {
-            case WeatherType.RainLight: case WeatherType.RainMedium: case WeatherType.RainHeavy:
-                wind = 1.2f; break;
-            case WeatherType.WindGustsLight:   wind = 1.5f; break;
-            case WeatherType.WindGustsMedium:  wind = 2.5f; break;
-            case WeatherType.WindGustsHeavy:   wind = 4.0f; break;
-            case WeatherType.Thunderstorm:     wind = 3.0f; break;
-            case WeatherType.Tornado:          wind = 5.0f; break;
+            case WeatherType.RainLight:        wind = 1.5f; break;
+            case WeatherType.RainMedium:       wind = 2.2f; break;
+            case WeatherType.RainHeavy:        wind = 3.0f; break;
+            case WeatherType.WindGustsLight:   wind = 2.5f; break;
+            case WeatherType.WindGustsMedium:  wind = 5.0f; break;
+            case WeatherType.WindGustsHeavy:   wind = 9.0f; break;
+            case WeatherType.Thunderstorm:     wind = 4.0f; break;
+            case WeatherType.Tornado:          wind = 11.0f; break;
         }
         ApplyWindScale(wind);
+
+        // Set actual WindManager speed so the ball is affected in flight
+        if (IsNetworkHost()) SetBaseWind(t);
+
         _weatherPhysicsApplied = true;
 
         if (t == WeatherType.Tornado && playerMovement != null)
         {
-            Vector2 off2D = UnityEngine.Random.insideUnitCircle.normalized * 30f;
+            float spawnDist = UnityEngine.Random.Range(15f, 22f);
+            Vector2 off2D = UnityEngine.Random.insideUnitCircle.normalized * spawnDist;
             _tornadoWorldPosition = playerMovement.transform.position
                 + new Vector3(off2D.x, 0f, off2D.y);
-            _tornadoPositionSet = true;
-            _tornadoMoveTimer   = 5f;
+            _tornadoPositionSet   = true;
+            _tornadoMoveTimer     = 5f;
+            _tornadoFlingNextTime = 0f;
         }
     }
 
@@ -196,19 +213,19 @@ public partial class BirdieMod
     private void EnsureDragReflection()
     {
         if (_wAirDragReady) return;
-        _wAirDragReady = true;
         try
         {
             object bs = GetGolfBallSettingsObject();
-            if (bs == null) { BirdieLog.Warning("[Birdie] Weather drag: GolfBallSettings null"); return; }
+            if (bs == null) return;  // don't flag ready — will retry next call
             Type t = bs.GetType();
             _wAirDragField = t.GetField("<LinearAirDragFactor>k__BackingField",
                 BindingFlags.NonPublic | BindingFlags.Instance);
             if (_wAirDragField == null || _wAirDragField.FieldType != typeof(float))
             { BirdieLog.Warning("[Birdie] Weather drag: field not found on " + t.Name); _wAirDragField = null; return; }
-            _wBallSettings       = bs;
+            _wBallSettings         = bs;
             _originalLinearAirDrag = (float)_wAirDragField.GetValue(bs);
             _originalAirDragCached = true;
+            _wAirDragReady         = true;  // only set on full success
         }
         catch (Exception ex) { BirdieLog.Warning("[Birdie] Weather drag reflection: " + ex.Message); }
     }
@@ -299,27 +316,39 @@ public partial class BirdieMod
         EnsureWmSyncReflection();
         while (_currentWeatherType != (byte)WeatherType.None)
         {
-            yield return new WaitForSeconds(UnityEngine.Random.Range(4f, 12f));
+            yield return new WaitForSeconds(UnityEngine.Random.Range(5f, 13f));
             if (_currentWeatherType == (byte)WeatherType.None) break;
 
             float baseI = GustIntensity((WeatherType)_currentWeatherType);
             if (baseI <= 0f) break;
 
-            float speed = baseI * UnityEngine.Random.Range(0.5f, 1.0f);
-            float angle = UnityEngine.Random.Range(0f, 360f);
-            try
+            // Burst of 1-3 rapid direction+speed changes
+            int bursts = UnityEngine.Random.Range(1, 4);
+            for (int i = 0; i < bursts; i++)
             {
-                if (_wWmType != null && _wWmSpeedProp != null && _wWmAngleProp != null)
+                // SyncVars are int — cast explicitly so the hook fires and WindUpdated event triggers
+                int gustSpeed = (int)(baseI * UnityEngine.Random.Range(0.7f, 1.0f));
+                int gustAngle = UnityEngine.Random.Range(0, 360);
+                try
                 {
-                    UnityEngine.Object wm = UnityEngine.Object.FindObjectOfType(_wWmType);
-                    if (wm != null)
+                    if (_wWmType != null && _wWmSpeedProp != null && _wWmAngleProp != null)
                     {
-                        _wWmSpeedProp.SetValue(wm, speed, null);
-                        _wWmAngleProp.SetValue(wm, angle, null);
+                        UnityEngine.Object wm = UnityEngine.Object.FindObjectOfType(_wWmType);
+                        if (wm != null)
+                        {
+                            _wWmSpeedProp.SetValue(wm, gustSpeed, null);
+                            _wWmAngleProp.SetValue(wm, gustAngle, null);
+                        }
                     }
                 }
+                catch (Exception ex) { BirdieLog.Warning("[Birdie] Gust set: " + ex.Message); }
+
+                PlayGustSound();
+
+                // Hold each gust pulse for a moment before next shift
+                if (i < bursts - 1)
+                    yield return new WaitForSeconds(UnityEngine.Random.Range(0.8f, 2.5f));
             }
-            catch (Exception ex) { BirdieLog.Warning("[Birdie] Gust set: " + ex.Message); }
         }
         _gustRunning = false;
     }
@@ -346,12 +375,8 @@ public partial class BirdieMod
                 _pendingLightningStrikePosition = target.transform.position;
                 _lightningStrikePending         = true;
 
-                Rigidbody rb = target.GetComponent<Rigidbody>();
-                if (rb != null)
-                    rb.AddForce(Vector3.up * 25f + UnityEngine.Random.insideUnitSphere * 15f,
-                        ForceMode.Impulse);
-                else
-                    TrySetVelocity(target, Vector3.up * 15f + UnityEngine.Random.insideUnitSphere * 8f);
+                Vector3 fling = Vector3.up * 28f + UnityEngine.Random.insideUnitSphere.normalized * 16f;
+                FlingPlayer(target, fling);
             }
             catch (Exception ex) { BirdieLog.Warning("[Birdie] Lightning strike: " + ex.Message); }
         }
@@ -364,34 +389,143 @@ public partial class BirdieMod
     {
         switch (t)
         {
-            case WeatherType.WindGustsLight:   return 3f;
-            case WeatherType.WindGustsMedium:  return 7f;
-            case WeatherType.WindGustsHeavy:   return 14f;
-            case WeatherType.Thunderstorm:     return 10f;
-            case WeatherType.Tornado:          return 18f;
-            case WeatherType.RainLight:
-            case WeatherType.RainMedium:
-            case WeatherType.RainHeavy:        return 3f;
+            case WeatherType.WindGustsLight:   return 20f;
+            case WeatherType.WindGustsMedium:  return 45f;
+            case WeatherType.WindGustsHeavy:   return 75f;
+            case WeatherType.Thunderstorm:     return 50f;
+            case WeatherType.Tornado:          return 90f;
+            case WeatherType.RainLight:        return 8f;
+            case WeatherType.RainMedium:       return 12f;
+            case WeatherType.RainHeavy:        return 18f;
             default:                           return 0f;
         }
     }
 
-    private void TrySetVelocity(Component target, Vector3 vel)
+    // FlingPlayer — sets linearVelocity directly on the PlayerMovement's private Rigidbody.
+    // Unity 6 renamed Rigidbody.velocity → linearVelocity; we try both via reflection.
+    private void FlingPlayer(Component target, Vector3 vel)
     {
         if (target == null) return;
         try
         {
-            Type t = target.GetType();
-            PropertyInfo pp = t.GetProperty("velocity",
-                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            if (pp != null && pp.CanWrite && pp.PropertyType == typeof(Vector3))
-            { pp.SetValue(target, vel, null); return; }
+            // Prefer the private rigidbody field on PlayerMovement for direct access
+            FieldInfo rbField = target.GetType().GetField("rigidbody",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            Rigidbody rb = rbField != null ? rbField.GetValue(target) as Rigidbody : null;
+            if (rb == null) rb = target.GetComponent<Rigidbody>()
+                             ?? target.GetComponentInChildren<Rigidbody>()
+                             ?? target.GetComponentInParent<Rigidbody>();
+            if (rb == null) return;
 
-            FieldInfo ff = t.GetField("velocity",
-                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            if (ff != null && ff.FieldType == typeof(Vector3)) ff.SetValue(target, vel);
+            rb.isKinematic = false;
+
+            // Try Unity 6 API first, fall back to legacy
+            PropertyInfo lvProp = typeof(Rigidbody).GetProperty("linearVelocity")
+                               ?? typeof(Rigidbody).GetProperty("velocity");
+            if (lvProp != null && lvProp.CanWrite)
+                lvProp.SetValue(rb, vel);
         }
-        catch { }
+        catch (Exception ex) { BirdieLog.Warning("[Birdie] FlingPlayer: " + ex.Message); }
+    }
+
+    private void SetBaseWind(WeatherType t)
+    {
+        int speed;
+        switch (t)
+        {
+            case WeatherType.RainLight:       speed = 8;  break;
+            case WeatherType.RainMedium:      speed = 14; break;
+            case WeatherType.RainHeavy:       speed = 20; break;
+            case WeatherType.WindGustsLight:  speed = 15; break;
+            case WeatherType.WindGustsMedium: speed = 30; break;
+            case WeatherType.WindGustsHeavy:  speed = 50; break;
+            case WeatherType.Thunderstorm:    speed = 35; break;
+            case WeatherType.Tornado:         speed = 60; break;
+            default:                          return;
+        }
+        EnsureWmSyncReflection();
+        try
+        {
+            if (_wWmType == null || _wWmSpeedProp == null || _wWmAngleProp == null) return;
+            UnityEngine.Object wm = UnityEngine.Object.FindObjectOfType(_wWmType);
+            if (wm == null) return;
+            _wWmSpeedProp.SetValue(wm, speed, null);
+            _wWmAngleProp.SetValue(wm, UnityEngine.Random.Range(0, 360), null);
+        }
+        catch (Exception ex) { BirdieLog.Warning("[Birdie] SetBaseWind: " + ex.Message); }
+    }
+
+    // ── Auto weather ──────────────────────────────────────────────────────────
+
+    private void SubscribeHoleChangeEvent()
+    {
+        if (_holeEventSubscribed) return;
+        try
+        {
+            Type cmType = null;
+            foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
+            { cmType = asm.GetType("CourseManager"); if (cmType != null) break; }
+            if (cmType == null) return;
+
+            EventInfo ei = cmType.GetEvent("CurrentHoleGlobalIndexChanged",
+                BindingFlags.Public | BindingFlags.Static);
+            if (ei == null) return;
+
+            MethodInfo mi = typeof(BirdieMod).GetMethod("OnHoleChanged",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            if (mi == null) return;
+
+            Delegate d = Delegate.CreateDelegate(typeof(Action), this, mi);
+            ei.AddEventHandler(null, d);
+            _holeEventSubscribed = true;
+        }
+        catch (Exception ex) { BirdieLog.Warning("[Birdie] Weather hole-event sub: " + ex.Message); }
+    }
+
+    private void OnHoleChanged()
+    {
+        if (!autoWeatherEnabled || !IsNetworkHost()) return;
+
+        // Clear weather between holes
+        if (_hostWeatherRunning)
+        {
+            _hostWeatherRunning = false;
+            BirdieWeatherBridge.BroadcastWeather(0, true);
+            ApplyWeather(0);
+        }
+
+        // Roll against spawn chance
+        if (UnityEngine.Random.Range(0, 100) < autoWeatherChance)
+            BirdieCoroutine.Start(AutoSpawnWeatherCoroutine());
+    }
+
+    private IEnumerator AutoSpawnWeatherCoroutine()
+    {
+        yield return new WaitForSeconds(UnityEngine.Random.Range(3f, 10f));
+
+        // Weighted random selection — higher % = more likely to be chosen
+        int totalWeight = 0;
+        for (int i = 0; i < autoWeatherChances.Length; i++)
+            if (autoWeatherChances[i] > 0) totalWeight += autoWeatherChances[i];
+        if (totalWeight == 0) yield break;
+
+        int roll = UnityEngine.Random.Range(0, totalWeight);
+        byte pick = 0;
+        int cumulative = 0;
+        for (int i = 0; i < autoWeatherChances.Length; i++)
+        {
+            if (autoWeatherChances[i] <= 0) continue;
+            cumulative += autoWeatherChances[i];
+            if (roll < cumulative) { pick = (byte)(i + 1); break; }
+        }
+        if (pick == 0) yield break;
+
+        bool weatherAllowed = (hostAllowedFeatureMask & (1UL << 15)) != 0;
+        _hostSelectedWeather = pick;
+        _hostWeatherRunning  = true;
+        BirdieWeatherBridge.BroadcastWeather(pick, weatherAllowed);
+        ApplyWeather(pick);
+        BirdieLog.Msg("[Birdie] Auto-weather spawned: " + (WeatherType)pick);
     }
 
 }

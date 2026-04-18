@@ -521,6 +521,37 @@ public partial class BirdieMod
         }
 
         GUILayout.Space(10f);
+        ImSectionHeader("AUTO WEATHER");
+
+        GUILayout.BeginHorizontal();
+        GUIStyle autoStyle = autoWeatherEnabled ? _imToggleOn : _imToggleOff;
+        if (GUILayout.Button(autoWeatherEnabled ? "Auto Weather  ON" : "Auto Weather  OFF", autoStyle, GUILayout.Height(28f)))
+            autoWeatherEnabled = !autoWeatherEnabled;
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(4f);
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("Spawn Chance", _imInfoLabel, GUILayout.Width(110f));
+        autoWeatherChance = Mathf.RoundToInt(GUILayout.HorizontalSlider(autoWeatherChance, 0f, 100f, GUILayout.Width(w - 180f)));
+        GUILayout.Label(autoWeatherChance + "%", _imInfoLabel, GUILayout.Width(40f));
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(4f);
+        GUILayout.Label("Per-Type Spawn Weight (0 = disabled):", _imInfoLabel);
+        string[] autoNames = { "Rain - Light", "Rain - Medium", "Rain - Heavy",
+                               "Wind - Light", "Wind - Medium", "Wind - Heavy",
+                               "Thunderstorm", "Tornado" };
+        for (int i = 0; i < autoNames.Length; i++)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(autoNames[i], _imInfoLabel, GUILayout.Width(115f));
+            autoWeatherChances[i] = Mathf.RoundToInt(
+                GUILayout.HorizontalSlider(autoWeatherChances[i], 0f, 100f, GUILayout.Width(w - 195f)));
+            GUILayout.Label(autoWeatherChances[i] + "%", _imInfoLabel, GUILayout.Width(40f));
+            GUILayout.EndHorizontal();
+        }
+
+        GUILayout.Space(10f);
         ImSectionHeader("NOTES");
         GUILayout.Label("Wind changes affect all players. Rain drag and visual effects apply to Birdie clients only.", _imInfoLabel);
 

@@ -1,5 +1,7 @@
 # Birdie Mod
-**Version 1.2.0** — Super Battle Golf | BepInEx
+**Version 1.3.0** — Super Battle Golf | BepInEx
+
+[![Discord](https://img.shields.io/badge/Discord-Join%20BirdieMod-5865F2?logo=discord&logoColor=white)](https://discord.gg/EaCRS6TBH9)
 
 > A feature-rich client and host mod that gives you full control over your round. Works solo, in private lobbies, or with friends. Every feature is individually toggleable — turn on what you want, leave off what you don't.
 
@@ -31,6 +33,7 @@ Press **F6** in-game at any time to open or close the Birdie Mod settings panel.
 | **$** | Grant yourself credits |
 | **Items** | Spawn items into your hotbar |
 | **Net** | Host Controls settings (host only) |
+| **Weather** | Live weather system (host only) |
 
 ---
 
@@ -238,6 +241,54 @@ A sub-toggle appears beneath Expanded Slots when it is enabled (host only):
 If you are a client and the host does not have the mod, your UI will show 8 slots but the server will reject picking up more than 3 items. The extra slots will remain empty.
 
 **Hotkey:** U (rebindable)
+
+---
+
+## Live Weather System (Host Only)
+
+Birdie Mod 1.3.0 introduces a host-controlled live weather system that adds real environmental effects to your round. All weather is broadcast from the host to every connected Birdie client.
+
+### Weather Types
+
+| Type | Effects |
+|------|---------|
+| **Rain — Light** | Light particle rain, mild air drag on the ball |
+| **Rain — Medium** | Heavier rain, increased drag |
+| **Rain — Heavy** | Dense rain, significant drag penalty |
+| **Wind Gusts — Light** | Periodic gusts that shift wind direction and speed |
+| **Wind Gusts — Medium** | Stronger and more frequent wind shifts |
+| **Wind Gusts — Heavy** | Severe gusts up to 75 mph |
+| **Thunderstorm** | Heavy rain + strong wind + periodic lightning strikes. Lightning can fling players |
+| **Tornado** | Extreme wind, spiral funnel VFX, and nearby players get flung. **Buggy in the current release — the tornado may not always fling players and the VFX is still being refined. Use at your own risk.** |
+
+### How Wind Affects the Ball
+
+When weather is active, the host sets the WindManager speed and direction directly — the ball is physically deflected during flight. Wind gusts fire in burst patterns every 5–13 seconds and shift both speed and direction. If the wind changes while your ball is in the air, the new wind applies immediately.
+
+Rain weather adds air drag to the ball (up to 2.5× normal drag in a thunderstorm), causing shots to fall shorter than expected.
+
+### Sound Effects
+
+Weather sounds play automatically (2D, no spatial falloff):
+- Rain loop, wind loop, and tornado loop play continuously while weather is active.
+- Gust and thunder crack one-shots play on each event.
+
+Sound files live in `BepInEx/plugins/BirdieMod/sounds/` and must be present for audio to work.
+
+### Manual Weather
+
+Open the **Weather** tab while hosting to select a weather type and click **Start Weather**. Click **Stop Weather** to clear it at any time.
+
+### Auto Weather
+
+Enable **Auto Weather** in the Weather tab to have weather spawn automatically at the start of each hole. A master **Spawn Chance** slider (0–100%) determines whether weather happens at all. Per-type weight sliders let you control how likely each type is to be selected — set a type to 0% to disable it entirely.
+
+Default weights: Rain Light 50%, Rain Medium 35%, Rain Heavy 20%, Wind Light 40%, Wind Medium 25%, Wind Heavy 10%, Thunderstorm 15%, Tornado 5%.
+
+### Known Issues
+
+- **Tornado VFX and fling are experimental.** The funnel visuals may not look correct on all systems, and the fling mechanic is not 100% reliable. This will be improved in a future update.
+- Weather physics (drag, wind) only apply to players running Birdie Mod. Unmodded players in the same lobby are unaffected.
 
 ---
 
