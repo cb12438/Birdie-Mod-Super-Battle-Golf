@@ -6,6 +6,7 @@ public partial class BirdieMod
     internal void BirdieInit()
     {
         LoadOrCreateConfig();
+        WeatherSystemInit();
     }
 
     internal void BirdieUpdate()
@@ -18,6 +19,8 @@ public partial class BirdieMod
         // immediately with a single bool check.
         BirdieGrantBridge.EnsureInitialized();
         BirdieHostBridge.EnsureHandlersRegistered();
+        BirdieWeatherBridge.EnsureHandlersRegistered();
+        WeatherSystemUpdate();
 
         PollDispenserPickup();
         PollCrateReturn();
@@ -60,6 +63,7 @@ public partial class BirdieMod
         {
             AutoSwingRelease();
         }
+        WeatherSystemLateUpdate();
     }
 
     private void HandleInput()

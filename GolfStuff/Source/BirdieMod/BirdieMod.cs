@@ -409,7 +409,11 @@ public partial class BirdieMod
 
     // ── Host Controls ─────────────────────────────────────────────────────────────
     private bool hostControlsActive;
-    private ulong hostAllowedFeatureMask = 0x7FFF; // bits 0-14 all on by default
+    private ulong hostAllowedFeatureMask = 0xFFFF; // bits 0-15 all on by default
+
+    // ── Weather System ────────────────────────────────────────────────────────────
+    private byte _hostSelectedWeather = 0;   // weather type the host has queued (0 = none)
+    private bool _hostWeatherRunning = false;
 
     private bool IsFeatureAllowed(int featureBit)
     {

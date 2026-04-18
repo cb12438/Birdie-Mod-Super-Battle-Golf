@@ -195,7 +195,7 @@ public partial class BirdieMod
         GUI.DrawTexture(new Rect(0, titleH + 1f, sideW, h - titleH - 1f), _imTxDarker);
         GUI.DrawTexture(new Rect(sideW, titleH + 1f, 1f, h - titleH - 1f), _imTxSeparator);
 
-        string[] tabLabels = { "Features", "Keys", "HUD", "$", "Items", "Net" };
+        string[] tabLabels = { "Features", "Keys", "HUD", "$", "Items", "Net", "Weather" };
         float tabH = 44f;
         for (int i = 0; i < tabLabels.Length; i++)
         {
@@ -219,6 +219,7 @@ public partial class BirdieMod
             case 3: DrawImCredits(cw);  break;
             case 4: DrawImItems(cw);    break;
             case 5: DrawImNetwork(cw);  break;
+            case 6: DrawImWeather(cw);  break;
         }
         GUILayout.EndArea();
 
@@ -438,6 +439,7 @@ public partial class BirdieMod
                 ImHostFeatureToggle("Expanded Slots",      12);
                 ImHostFeatureToggle("Coffee Boost",        13);
                 ImHostFeatureToggle("Assist",              14);
+                ImHostFeatureToggle("Weather",             15);
             }
         }
         else
@@ -455,6 +457,72 @@ public partial class BirdieMod
                 GUILayout.Label("No host control active. All features available.", _imInfoLabel);
             }
         }
+
+        GUILayout.EndScrollView();
+    }
+
+    // ── Weather tab (host only) ──────────────────────────────────────────────
+
+    private void DrawImWeather(float w)
+    {
+        _imNetScroll = GUILayout.BeginScrollView(_imNetScroll);
+
+        if (!IsNetworkHost())
+        {
+            GUILayout.Label("Weather controls are available to the lobby host only.", _imInfoLabel);
+            GUILayout.EndScrollView();
+            return;
+        }
+
+        ImSectionHeader("WEATHER EVENT");
+
+        string[] weatherNames = {
+            "None (Clear)", "Rain - Light", "Rain - Medium", "Rain - Heavy",
+            "Wind Gusts - Light", "Wind Gusts - Medium", "Wind Gusts - Heavy",
+            "Thunderstorm", "Tornado"
+        };
+
+        for (int i = 0; i < weatherNames.Length; i++)
+        {
+            bool isSelected = (_hostSelectedWeather == (byte)i);
+            GUIStyle s = isSelected ? _imToggleOn : _imToggleOff;
+            if (GUILayout.Button(weatherNames[i], s, GUILayout.Height(28f)))
+            {
+                _hostSelectedWeather = (byte)i;
+            }
+        }
+
+        GUILayout.Space(8f);
+
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button(_hostWeatherRunning ? "Stop Weather" : "Start Weather", _imButton, GUILayout.Height(34f)))
+        {
+            if (_hostWeatherRunning)
+            {
+                _hostWeatherRunning = false;
+                BirdieWeatherBridge.BroadcastWeather(0, true);
+                ApplyWeather(0);
+            }
+            else
+            {
+                _hostWeatherRunning = true;
+                bool weatherAllowed = (hostAllowedFeatureMask & (1UL << 15)) != 0;
+                BirdieWeatherBridge.BroadcastWeather(_hostSelectedWeather, weatherAllowed);
+                ApplyWeather(_hostSelectedWeather);
+            }
+        }
+        GUILayout.EndHorizontal();
+
+        if (_hostWeatherRunning)
+        {
+            GUIStyle activeStyle = new GUIStyle(_imInfoLabel);
+            activeStyle.normal.textColor = new Color(0.30f, 0.85f, 0.45f, 1f);
+            GUILayout.Label("Weather active: " + ((_hostSelectedWeather < 9) ? new string[]{ "None","Rain (Light)","Rain (Medium)","Rain (Heavy)","Wind Gusts (Light)","Wind Gusts (Medium)","Wind Gusts (Heavy)","Thunderstorm","Tornado" }[_hostSelectedWeather] : "Unknown"), activeStyle);
+        }
+
+        GUILayout.Space(10f);
+        ImSectionHeader("NOTES");
+        GUILayout.Label("Wind changes affect all players. Rain drag and visual effects apply to Birdie clients only.", _imInfoLabel);
 
         GUILayout.EndScrollView();
     }

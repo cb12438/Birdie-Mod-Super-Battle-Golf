@@ -68,6 +68,8 @@ for %%r in (
     "UnityEngine.UIElementsModule.dll"
     "UnityEngine.IMGUIModule.dll"
     "UnityEngine.TextRenderingModule.dll"
+    "UnityEngine.ParticleSystemModule.dll"
+    "UnityEngine.AudioModule.dll"
     "RosettaUI.dll"
     "netstandard.dll"
 ) do (
