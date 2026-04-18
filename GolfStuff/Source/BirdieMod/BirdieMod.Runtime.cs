@@ -20,6 +20,12 @@ public partial class BirdieMod
         BirdieGrantBridge.EnsureInitialized();
         BirdieHostBridge.EnsureHandlersRegistered();
         BirdieWeatherBridge.EnsureHandlersRegistered();
+
+        if (BirdieHostBridge.FlagExpandedSlotsForClient && !expandedSlotsEnabled)
+        {
+            BirdieHostBridge.FlagExpandedSlotsForClient = false;
+            ToggleExpandedSlots();
+        }
         WeatherSystemUpdate();
 
         PollDispenserPickup();

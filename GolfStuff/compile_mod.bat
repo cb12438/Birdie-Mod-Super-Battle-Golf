@@ -2,7 +2,7 @@
 setlocal EnableExtensions EnableDelayedExpansion
 cd /d "%~dp0"
 
-echo [1/5] Locating C# compiler...
+echo [1/3] Locating C# compiler...
 set "CSC_PATH="
 set "PF86=%ProgramFiles(x86)%"
 set "PF64=%ProgramFiles%"
@@ -25,7 +25,7 @@ if not defined CSC_PATH (
 )
 
 echo [INFO] Compiler: %CSC_PATH%
-echo [2/5] Resolving game directory...
+echo [2/3] Resolving game directory...
 
 set "GAME_ROOT=%~1"
 if not defined GAME_ROOT if defined SUPER_BATTLE_GOLF_DIR set "GAME_ROOT=%SUPER_BATTLE_GOLF_DIR%"
@@ -81,58 +81,23 @@ for %%r in (
 set "SRC_ROOT=Source\BirdieMod"
 
 REM ═══════════════════════════════════════════════════════════════════════════
-REM  BUILD 1 — MelonLoader
+REM  BUILD — BepInEx
 REM ═══════════════════════════════════════════════════════════════════════════
-echo [3/5] Building MelonLoader DLL...
-
-if not exist "%GAME_ROOT%\MelonLoader\MelonLoader.dll" (
-    echo [ERROR] MelonLoader not found: %GAME_ROOT%\MelonLoader\MelonLoader.dll
-    exit /b 1
-)
-
-set "ML_OUT_DLL=Mods\BirdieMod.dll"
-set "ML_OUT_PDB=Mods\BirdieMod.pdb"
-set "ML_SRC="
-
-for /R "%SRC_ROOT%" %%f in (*.cs) do (
-    if /I not "%%~nxf"=="BirdieMod.BepInEntry.cs" (
-        set "ML_SRC=!ML_SRC! "%%f""
-    )
-)
-
-if exist "%ML_OUT_PDB%" del /q "%ML_OUT_PDB%"
-
-"%CSC_PATH%" /nologo /target:library /langversion:latest /optimize+ /deterministic+ /debug:portable ^
-    /pdb:"%ML_OUT_PDB%" /out:"%ML_OUT_DLL%" ^
-    /reference:"%GAME_ROOT%\MelonLoader\MelonLoader.dll" ^
-    !UNITY_REFS! ^
-    !ML_SRC!
-
-if errorlevel 1 (
-    echo [ERROR] MelonLoader build failed.
-    exit /b 1
-)
-echo [OK] MelonLoader: %ML_OUT_DLL%
-
-REM ═══════════════════════════════════════════════════════════════════════════
-REM  BUILD 2 — BepInEx
-REM ═══════════════════════════════════════════════════════════════════════════
-echo [4/5] Building BepInEx DLL...
+echo [3/3] Building BepInEx DLL...
 
 set "BEPINEX_REF=%GAME_ROOT%\BepInEx\core\BepInEx.dll"
 if not exist "%BEPINEX_REF%" (
-    REM Fallback to lib folder reference DLL
     set "BEPINEX_REF=%~dp0lib\bepinex\BepInEx.dll"
 )
 
 if not exist "%BEPINEX_REF%" (
-    echo [WARN] BepInEx.dll not found — skipping BepInEx build.
-    echo [WARN] Install BepInEx to %GAME_ROOT% or run compile_mod.bat from the game directory.
-    goto :deploy_ml
+    echo [ERROR] BepInEx.dll not found at %BEPINEX_REF%
+    echo [ERROR] Install BepInEx to %GAME_ROOT% or place BepInEx.dll in lib\bepinex\.
+    exit /b 1
 )
 
-set "BEPINEX_OUT_DLL=Mods\BirdieMod.BepInEx.dll"
-set "BEPINEX_OUT_PDB=Mods\BirdieMod.BepInEx.pdb"
+set "BEPINEX_OUT_DLL=Mods\BirdieMod.dll"
+set "BEPINEX_OUT_PDB=Mods\BirdieMod.pdb"
 set "BEPINEX_SRC="
 
 for /R "%SRC_ROOT%" %%f in (*.cs) do (
@@ -154,24 +119,20 @@ if errorlevel 1 (
     echo [ERROR] BepInEx build failed.
     exit /b 1
 )
-echo [OK] BepInEx:    %BEPINEX_OUT_DLL%
+echo [OK] BepInEx: %BEPINEX_OUT_DLL%
 
-:deploy_ml
 REM ═══════════════════════════════════════════════════════════════════════════
-REM  DEPLOY MelonLoader DLL to game Mods folder
+REM  DEPLOY BepInEx DLL to game plugins folder
 REM ═══════════════════════════════════════════════════════════════════════════
-echo [5/5] Deploying MelonLoader DLL to game...
-if exist "Mods\PlayerMenuMod.dll" del /q "Mods\PlayerMenuMod.dll"
-
-set "GAME_MODS=%GAME_ROOT%\Mods"
-if not exist "%GAME_MODS%" (
-    echo [WARN] Game Mods folder not found: %GAME_MODS%
+set "GAME_PLUGINS=%GAME_ROOT%\BepInEx\plugins"
+if not exist "%GAME_PLUGINS%" (
+    echo [WARN] BepInEx plugins folder not found: %GAME_PLUGINS%
     exit /b 0
 )
-copy /y "%ML_OUT_DLL%" "%GAME_MODS%\" >nul
+copy /y "%BEPINEX_OUT_DLL%" "%GAME_PLUGINS%\" >nul
 if errorlevel 1 (
     echo [WARN] Deploy failed — copy error.
 ) else (
-    echo [OK] Deployed: %GAME_MODS%\BirdieMod.dll
+    echo [OK] Deployed: %GAME_PLUGINS%\BirdieMod.dll
 )
 exit /b 0

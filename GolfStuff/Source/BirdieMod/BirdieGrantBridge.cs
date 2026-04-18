@@ -37,6 +37,7 @@ internal static class BirdieGrantBridge
     // ── state ────────────────────────────────────────────────────────────────
 
     private static bool initialized;
+    private static float _nextRetry = -1f;
     private static ushort registeredCommandHash;
 
     // ── Mirror reflection cache ──────────────────────────────────────────────
@@ -87,25 +88,23 @@ internal static class BirdieGrantBridge
         return initialized && registeredCommandHash != 0;
     }
 
-    // One-time setup. Called lazily before first use. Idempotent.
+    // Retries every 2 s until Mirror + Assembly-CSharp are fully loaded.
     internal static void EnsureInitialized()
     {
-        if (initialized)
-        {
-            return;
-        }
-
-        initialized = true;
+        if (initialized) return;
+        float now = UnityEngine.Time.time;
+        if (now < _nextRetry) return;
+        _nextRetry = now + 2f;
 
         try
         {
-            if (!CollectReflectionCaches())
-            {
-                BirdieLog.Warning("[Birdie] Grant bridge: Mirror reflection incomplete — client item grant unavailable.");
-                return;
-            }
-
+            if (!CollectReflectionCaches()) return;
             RegisterCommandHandler();
+            if (registeredCommandHash != 0)
+            {
+                initialized = true;
+                BirdieLog.Msg("[Birdie] Grant bridge ready.");
+            }
         }
         catch (Exception ex)
         {

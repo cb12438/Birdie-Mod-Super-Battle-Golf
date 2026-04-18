@@ -1841,7 +1841,6 @@ internal static class BirdieIcePatchBridge
     internal static float NormalDragValue = 10f;
 
     private static bool patchApplied;
-    private static float lastLogTime = -999f;
 
     // One-time Harmony patch registration. Idempotent.
     internal static void EnsurePatchApplied()
@@ -2014,17 +2013,6 @@ internal static class BirdieIcePatchBridge
             if (current < NormalDragValue * 0.9f)
             {
                 HorizontalDragField.SetValue(__instance, NormalDragValue);
-
-                // Rate-limit the console log to once per second to avoid spam.
-                float now = UnityEngine.Time.time;
-                if (now - lastLogTime >= 1f)
-                {
-                    lastLogTime = now;
-                    BirdieLog.Msg(string.Format(
-                        "[Birdie] Ice immunity: horizontalDrag {0:F3} -> {1:F3}",
-                        current,
-                        NormalDragValue));
-                }
             }
         }
         catch

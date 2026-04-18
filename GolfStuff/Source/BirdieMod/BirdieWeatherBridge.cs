@@ -38,6 +38,7 @@ internal static class BirdieWeatherBridge
     // ── private state ─────────────────────────────────────────────────────────
 
     private static bool initialized;
+    private static float _nextRetry = -1f;
     private static ushort registeredRpcHash;
 
     // ── Mirror reflection cache ──────────────────────────────────────────────
@@ -78,25 +79,23 @@ internal static class BirdieWeatherBridge
 
     // ── public API ───────────────────────────────────────────────────────────
 
-    // Idempotent. Safe to call every frame — returns immediately after first call.
+    // Retries every 2 s until Mirror + Assembly-CSharp are fully loaded.
     internal static void EnsureHandlersRegistered()
     {
-        if (initialized)
-        {
-            return;
-        }
-
-        initialized = true;
+        if (initialized) return;
+        float now = UnityEngine.Time.time;
+        if (now < _nextRetry) return;
+        _nextRetry = now + 2f;
 
         try
         {
-            if (!CollectReflectionCaches())
-            {
-                BirdieLog.Warning("[Birdie] Weather bridge: Mirror reflection incomplete — weather broadcast unavailable.");
-                return;
-            }
-
+            if (!CollectReflectionCaches()) return;
             RegisterRpcHandler();
+            if (registeredRpcHash != 0)
+            {
+                initialized = true;
+                BirdieLog.Msg("[Birdie] Weather bridge ready.");
+            }
         }
         catch (Exception ex)
         {

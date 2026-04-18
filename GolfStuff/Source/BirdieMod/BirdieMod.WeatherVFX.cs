@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
@@ -7,6 +8,10 @@ using UnityEngine.Networking;
 
 public partial class BirdieMod
 {
+    // ── Tracked materials (destroyed on weather stop to prevent leaks) ────────
+    private readonly List<Material> _weatherMaterials = new List<Material>();
+    private Material TrackMat(Material m) { _weatherMaterials.Add(m); return m; }
+
     // ── VFX object references ─────────────────────────────────────────────────
     private GameObject     _weatherVfxRoot;
     private ParticleSystem _rainPs;
@@ -112,6 +117,10 @@ public partial class BirdieMod
 
         if (_lightningLight != null && _lightningLight.gameObject != null)
             UnityEngine.Object.Destroy(_lightningLight.gameObject);
+
+        foreach (Material mat in _weatherMaterials)
+            if (mat != null) UnityEngine.Object.Destroy(mat);
+        _weatherMaterials.Clear();
 
         _rainPs               = null;
         _tornadoPs            = null;
@@ -234,8 +243,8 @@ public partial class BirdieMod
         renderer.renderMode    = ParticleSystemRenderMode.Stretch;
         renderer.velocityScale = 0.04f;
         renderer.lengthScale   = 2.5f;
-        renderer.material      = new Material(
-            Shader.Find("Particles/Standard Unlit") ?? Shader.Find("Sprites/Default"));
+        renderer.material      = TrackMat(new Material(
+            Shader.Find("Particles/Standard Unlit") ?? Shader.Find("Sprites/Default")));
 
         return ps;
     }
@@ -284,8 +293,8 @@ public partial class BirdieMod
         rend.renderMode    = ParticleSystemRenderMode.Stretch;
         rend.velocityScale = 0.20f;
         rend.lengthScale   = 12f;
-        rend.material      = new Material(
-            Shader.Find("Particles/Standard Unlit") ?? Shader.Find("Sprites/Default"));
+        rend.material      = TrackMat(new Material(
+            Shader.Find("Particles/Standard Unlit") ?? Shader.Find("Sprites/Default")));
         ps.Play();
 
         // ── Layer 2: ground dust swirl (Billboard, small) ─────────────────────
@@ -321,8 +330,8 @@ public partial class BirdieMod
 
         var ringRend = ringGo.GetComponent<ParticleSystemRenderer>();
         ringRend.renderMode = ParticleSystemRenderMode.Billboard;
-        ringRend.material   = new Material(
-            Shader.Find("Particles/Standard Unlit") ?? Shader.Find("Sprites/Default"));
+        ringRend.material   = TrackMat(new Material(
+            Shader.Find("Particles/Standard Unlit") ?? Shader.Find("Sprites/Default")));
         ringPs.Play();
 
         // ── Layer 3: debris (small chunks, Billboard) ─────────────────────────
@@ -361,8 +370,8 @@ public partial class BirdieMod
 
         var debrisRend = debrisGo.GetComponent<ParticleSystemRenderer>();
         debrisRend.renderMode = ParticleSystemRenderMode.Billboard;
-        debrisRend.material   = new Material(
-            Shader.Find("Particles/Standard Unlit") ?? Shader.Find("Sprites/Default"));
+        debrisRend.material   = TrackMat(new Material(
+            Shader.Find("Particles/Standard Unlit") ?? Shader.Find("Sprites/Default")));
         debrisPs.Play();
 
         return ps;

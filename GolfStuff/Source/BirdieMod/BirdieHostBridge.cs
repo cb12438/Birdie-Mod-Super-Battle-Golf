@@ -37,7 +37,9 @@ internal static class BirdieHostBridge
     // ── private state ─────────────────────────────────────────────────────────
 
     private static bool initialized;
+    private static float _nextRetry = -1f;
     private static ushort registeredRpcHash;
+    internal static bool FlagExpandedSlotsForClient;
 
     // ── Mirror reflection cache ──────────────────────────────────────────────
 
@@ -77,25 +79,23 @@ internal static class BirdieHostBridge
 
     // ── public API ───────────────────────────────────────────────────────────
 
-    // Idempotent. Safe to call every frame — returns immediately after first call.
+    // Retries every 2 s until Mirror + Assembly-CSharp are fully loaded.
     internal static void EnsureHandlersRegistered()
     {
-        if (initialized)
-        {
-            return;
-        }
-
-        initialized = true;
+        if (initialized) return;
+        float now = UnityEngine.Time.time;
+        if (now < _nextRetry) return;
+        _nextRetry = now + 2f;
 
         try
         {
-            if (!CollectReflectionCaches())
-            {
-                BirdieLog.Warning("[Birdie] Host bridge: Mirror reflection incomplete — host config broadcast unavailable.");
-                return;
-            }
-
+            if (!CollectReflectionCaches()) return;
             RegisterRpcHandler();
+            if (registeredRpcHash != 0)
+            {
+                initialized = true;
+                BirdieLog.Msg("[Birdie] Host bridge ready.");
+            }
         }
         catch (Exception ex)
         {
@@ -216,6 +216,8 @@ internal static class BirdieHostBridge
             {
                 IsUnderHostControl = true;
                 ReceivedFeatureMask = mask;
+                if ((mask & (1UL << 12)) != 0)
+                    FlagExpandedSlotsForClient = true;
                 BirdieLog.Msg("[Birdie] Host bridge: host control active, featureMask=0x" + mask.ToString("X16"));
             }
             else
