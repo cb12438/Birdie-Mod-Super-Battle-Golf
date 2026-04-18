@@ -1,6 +1,6 @@
 {
     "name": "BirdieMod",
-    "version_number": "1.3.0",
+    "version_number": "1.3.1",
     "website_url": "https://github.com/cb12438/Birdie-Mod-Super-Battle-Golf",
     "description": "Host & client mod for Super Battle Golf. Live Weather System: rain, wind gusts, thunderstorms, and tornadoes with real ball physics. Host Controls, auto-assist, expanded hotbar, no wind, speed boost, item spawning, and 14+ toggleable features.",
     "dependencies": []

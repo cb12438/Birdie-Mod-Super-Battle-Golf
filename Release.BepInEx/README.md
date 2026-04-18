@@ -1,5 +1,5 @@
 # Birdie Mod
-**Version 1.3.0** — Super Battle Golf | BepInEx
+**Version 1.3.1** — Super Battle Golf | BepInEx
 
 [![Discord](https://img.shields.io/badge/Discord-Join%20BirdieMod-5865F2?logo=discord&logoColor=white)](https://discord.gg/EaCRS6TBH9)
 
